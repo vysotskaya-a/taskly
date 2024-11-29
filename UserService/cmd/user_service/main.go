@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"user-service/app"
+	"user-service/internal/app"
 )
 
 func main() {
