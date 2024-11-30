@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/emptypb"
 	"log"
 	"net"
 	"user-service/internal/models"
@@ -73,14 +72,14 @@ func (s *Server) UpdateUser(ctx context.Context, req *user_service.User) (*user_
 	return req, nil
 }
 
-func (s *Server) DeleteUser(ctx context.Context, req *user_service.GetUserRequest) (*emptypb.Empty, error) {
+func (s *Server) DeleteUser(ctx context.Context, req *user_service.GetUserRequest) (*user_service.Empty, error) {
 	// Логика удаления пользователя
 	err := s.userService.DeleteUser(ctx, req.GetId())
 	if err != nil {
 		return nil, err
 	}
 
-	return &emptypb.Empty{}, nil
+	return &user_service.Empty{}, nil
 }
 
 func (s *Server) StartServer(grpcPort string) error {
