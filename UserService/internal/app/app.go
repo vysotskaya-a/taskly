@@ -3,13 +3,13 @@ package app
 import (
 	"context"
 	"fmt"
-	"net"
-	"user-service/internal/closer"
-	"user-service/internal/config"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
+	"net"
+	"user-service/internal/closer"
+	"user-service/internal/config"
+	pb "user-service/pkg/api/user_v1"
 )
 
 type App struct {
@@ -72,6 +72,8 @@ func (a *App) initGRPCServer(ctx context.Context) error {
 	a.grpcServer = grpc.NewServer(grpc.Creds(insecure.NewCredentials()))
 
 	reflection.Register(a.grpcServer)
+
+	pb.RegisterUserServiceServer(a.grpcServer, a.serviceProvider.UserServer(ctx))
 
 	return nil
 }
