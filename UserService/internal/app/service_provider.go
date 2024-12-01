@@ -5,6 +5,11 @@ import (
 	"fmt"
 	"user-service/internal/closer"
 	"user-service/internal/config"
+	"user-service/internal/repository"
+	userRepository "user-service/internal/repository/postgres"
+	userServer "user-service/internal/server/user"
+	"user-service/internal/service"
+	userService "user-service/internal/service/user"
 
 	"github.com/jmoiron/sqlx"
 
@@ -15,7 +20,12 @@ type serviceProvider struct {
 	pgConfig   config.PGConfig
 	grpcConfig config.GRPCConfig
 
-	db *sqlx.DB
+	db             *sqlx.DB
+	userRepository repository.UserRepository
+
+	userService service.UserService
+
+	userServer *userServer.Server
 }
 
 func newServiceProvider() *serviceProvider {
@@ -50,10 +60,34 @@ func (s *serviceProvider) GRPCConfig() config.GRPCConfig {
 
 func (s *serviceProvider) DBClient(ctx context.Context) *sqlx.DB {
 	if s.db == nil {
-		database := db.Init(s.pgConfig.PGConn())
+		database := db.Init(s.PGConfig().PGConn())
 		closer.Add(database.Close)
 		s.db = database
 	}
 
 	return s.db
+}
+
+func (s *serviceProvider) UserRepository(ctx context.Context) repository.UserRepository {
+	if s.userRepository == nil {
+		s.userRepository = userRepository.NewUserRepository(s.DBClient(ctx))
+	}
+
+	return s.userRepository
+}
+
+func (s *serviceProvider) UserService(ctx context.Context) service.UserService {
+	if s.userService == nil {
+		s.userService = userService.NewService(s.UserRepository(ctx))
+	}
+
+	return s.userService
+}
+
+func (s *serviceProvider) UserServer(ctx context.Context) *userServer.Server {
+	if s.userServer == nil {
+		s.userServer = userServer.NewServer(s.UserService(ctx))
+	}
+
+	return s.userServer
 }
