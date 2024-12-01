@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"user-service/internal/app"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func main() {
