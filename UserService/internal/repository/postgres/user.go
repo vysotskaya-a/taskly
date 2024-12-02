@@ -75,6 +75,30 @@ func (r *UserRepository) GetByID(ctx context.Context, id string) (*models.User, 
 	return &user, nil
 }
 
+// GetByEmail получает пользователя по его почте.
+func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*models.User, error) {
+	builder := sq.Select(usersIDColumn, usersEmailColumn, usersPasswordHashColumn, usersGradeColumn, usersCreatedAtColumn).
+		From(usersTableName).
+		Where(sq.Eq{usersEmailColumn: email}).
+		Limit(1).
+		PlaceholderFormat(sq.Dollar)
+
+	query, args, err := builder.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	var user models.User
+	err = r.db.GetContext(ctx, &user, query, args...)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errorz.ErrUserNotFound
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
 // Update обновляет данные пользователя.
 func (r *UserRepository) Update(ctx context.Context, user *models.User) error {
 	builder := sq.Update(usersTableName).
