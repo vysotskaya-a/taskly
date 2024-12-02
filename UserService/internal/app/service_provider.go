@@ -7,8 +7,10 @@ import (
 	"user-service/internal/config"
 	"user-service/internal/repository"
 	userRepository "user-service/internal/repository/postgres"
+	authServer "user-service/internal/server/auth"
 	userServer "user-service/internal/server/user"
 	"user-service/internal/service"
+	authService "user-service/internal/service/auth"
 	userService "user-service/internal/service/user"
 
 	"github.com/jmoiron/sqlx"
@@ -19,13 +21,16 @@ import (
 type serviceProvider struct {
 	pgConfig   config.PGConfig
 	grpcConfig config.GRPCConfig
+	jwtConfig  config.JWTConfig
 
 	db             *sqlx.DB
 	userRepository repository.UserRepository
 
 	userService service.UserService
+	authService service.AuthService
 
 	userServer *userServer.Server
+	authServer *authServer.Server
 }
 
 func newServiceProvider() *serviceProvider {
@@ -90,4 +95,20 @@ func (s *serviceProvider) UserServer(ctx context.Context) *userServer.Server {
 	}
 
 	return s.userServer
+}
+
+func (s *serviceProvider) AuthService(ctx context.Context) service.AuthService {
+	if s.authService == nil {
+		s.authService = authService.NewService(s.UserRepository(ctx))
+	}
+
+	return s.authService
+}
+
+func (s *serviceProvider) AuthServer(ctx context.Context) *authServer.Server {
+	if s.authServer == nil {
+		s.authServer = authServer.NewServer(s.AuthService(ctx))
+	}
+
+	return s.authServer
 }

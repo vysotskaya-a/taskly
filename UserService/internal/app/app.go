@@ -9,7 +9,8 @@ import (
 	"net"
 	"user-service/internal/closer"
 	"user-service/internal/config"
-	pb "user-service/pkg/api/user_v1"
+	authpb "user-service/pkg/api/auth_v1"
+	userpb "user-service/pkg/api/user_v1"
 )
 
 type App struct {
@@ -73,7 +74,8 @@ func (a *App) initGRPCServer(ctx context.Context) error {
 
 	reflection.Register(a.grpcServer)
 
-	pb.RegisterUserServiceServer(a.grpcServer, a.serviceProvider.UserServer(ctx))
+	userpb.RegisterUserServiceServer(a.grpcServer, a.serviceProvider.UserServer(ctx))
+	authpb.RegisterAuthV1Server(a.grpcServer, a.serviceProvider.AuthServer(ctx))
 
 	return nil
 }
