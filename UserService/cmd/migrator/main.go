@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -12,47 +13,54 @@ import (
 	_ "github.com/lib/pq"
 )
 
+const (
+	migrationDirEnvName = "MIGRATION_DIR"
+	pgConnEnvName       = "PG_CONN"
+)
+
 func main() {
-	var migrationPath, connection string
+	var migrationDir, connection string
 
-	migrationPath, _ = os.LookupEnv("MIGRATION_PATH")
-	connection, _ = os.LookupEnv("DB_CONNECTION")
-	// migration_path db_connection лучше вынести в константы в самом верху файла аля
-	// const MigrationPath = "MIGRATION_PATH"
+	migrationDir, _ = os.LookupEnv(migrationDirEnvName)
+	connection, _ = os.LookupEnv(pgConnEnvName)
 
-	if migrationPath == "" || connection == "" {
-		panic("MIGRATION_PATH and DB_CONNECTION env vars must be set")
-
-		// а зачем прям паника? паника применяется в случае если происходит прям какое-то неожиданное треш-поведение, сюда лучше ошибку 
+	if migrationDir == "" || connection == "" {
+		log.Println("MIGRATION_PATH and DB_CONNECTION env vars must be set")
+		return
 	}
 
 	db, err := sql.Open("postgres", connection)
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return
 	}
 	defer db.Close()
 
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return
 	}
 
-	fsrc, err := (&file.File{}).Open(fmt.Sprintf("file://%s", migrationPath))
+	fsrc, err := (&file.File{}).Open(fmt.Sprintf("file://%s", migrationDir))
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return
 	}
 
 	m, err := migrate.NewWithInstance("file", fsrc, "postgres", driver)
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return
 	}
-	// здесь про паники такой же коммент 
-	if err := m.Up(); err != nil {
+	if err = m.Up(); err != nil {
 		if errors.Is(err, migrate.ErrNoChange) {
 			fmt.Println("no changes")
 			return
 		}
-		panic(err)
+		log.Println(err)
+		return
 	}
-	fmt.Println("success")
+
+	log.Println("success")
 }
