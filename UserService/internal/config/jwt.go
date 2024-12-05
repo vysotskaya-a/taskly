@@ -31,11 +31,15 @@ func NewJWTConfig() (JWTConfig, error) {
 	refreshTokenSecret := os.Getenv(refreshTokenSecretEnvName)
 	if len(refreshTokenSecret) == 0 {
 		return nil, errors.New("refresh token secret not found")
+				// https://github.com/uber-go/guide/blob/master/style.md#error-types
+
 	}
 
 	refreshTokenExpirationStr := os.Getenv(refreshTokenExpirationEnvName)
 	if len(refreshTokenSecret) == 0 {
 		return nil, errors.New("refresh token expiration not found")
+				// https://github.com/uber-go/guide/blob/master/style.md#error-types
+
 	}
 	refreshTokenExpiration, err := time.ParseDuration(refreshTokenExpirationStr)
 	if err != nil {
@@ -45,11 +49,15 @@ func NewJWTConfig() (JWTConfig, error) {
 	accessTokenSecret := os.Getenv(accessTokenSecretEnvName)
 	if len(refreshTokenSecret) == 0 {
 		return nil, errors.New("access token secret not found")
+				// https://github.com/uber-go/guide/blob/master/style.md#error-types
+
 	}
 
 	accessTokenExpirationStr := os.Getenv(accessTokenExpirationEnvName)
 	if len(refreshTokenSecret) == 0 {
 		return nil, errors.New("access token expiration not found")
+				// https://github.com/uber-go/guide/blob/master/style.md#error-types
+
 	}
 	accessTokenExpiration, err := time.ParseDuration(accessTokenExpirationStr)
 	if err != nil {

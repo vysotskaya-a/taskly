@@ -15,7 +15,7 @@ func main() {
 	if err != nil {
 		panic(fmt.Errorf("failed to init app: %s", err.Error()))
 	}
-
+	// и здесь про паники то же самое 
 	err = a.Run()
 	if err != nil {
 		panic(fmt.Errorf("failed to run app: %s", err.Error()))

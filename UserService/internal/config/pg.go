@@ -21,6 +21,8 @@ func NewPGConfig() (PGConfig, error) {
 	pgConn := os.Getenv(pgConnEnvName)
 	if len(pgConn) == 0 {
 		return nil, errors.New("pg dsn not found")
+				// https://github.com/uber-go/guide/blob/master/style.md#error-types
+
 	}
 
 	return &pgConfig{

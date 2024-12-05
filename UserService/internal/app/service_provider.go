@@ -41,7 +41,9 @@ func (s *serviceProvider) PGConfig() config.PGConfig {
 	if s.pgConfig == nil {
 		cfg, err := config.NewPGConfig()
 		if err != nil {
-			panic(fmt.Errorf("failed to get pg config: %s", err.Error()))
+			panic(fmt.Errorf("failed to get pg config: %s", err.Error())) // лишняя паника и для типа err нужно использовать при форматировании флаг %w
+			// fmt.Errorf("puk: %w", err)
+			// в коде ниже то же самое 
 		}
 
 		s.pgConfig = cfg
@@ -54,7 +56,7 @@ func (s *serviceProvider) GRPCConfig() config.GRPCConfig {
 	if s.grpcConfig == nil {
 		cfg, err := config.NewGRPCConfig()
 		if err != nil {
-			panic(fmt.Errorf("failed to get grpc config: %s", err.Error()))
+			panic(fmt.Errorf("failed to get grpc config: %s", err.Error())) // выше читать
 		}
 
 		s.grpcConfig = cfg
@@ -112,3 +114,5 @@ func (s *serviceProvider) AuthServer(ctx context.Context) *authServer.Server {
 
 	return s.authServer
 }
+
+// не совсем понял зачем нужны эти функции поясните плиз 

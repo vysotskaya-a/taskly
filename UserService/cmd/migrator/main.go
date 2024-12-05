@@ -17,9 +17,13 @@ func main() {
 
 	migrationPath, _ = os.LookupEnv("MIGRATION_PATH")
 	connection, _ = os.LookupEnv("DB_CONNECTION")
+	// migration_path db_connection лучше вынести в константы в самом верху файла аля
+	// const MigrationPath = "MIGRATION_PATH"
 
 	if migrationPath == "" || connection == "" {
 		panic("MIGRATION_PATH and DB_CONNECTION env vars must be set")
+
+		// а зачем прям паника? паника применяется в случае если происходит прям какое-то неожиданное треш-поведение, сюда лучше ошибку 
 	}
 
 	db, err := sql.Open("postgres", connection)
@@ -42,7 +46,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
+	// здесь про паники такой же коммент 
 	if err := m.Up(); err != nil {
 		if errors.Is(err, migrate.ErrNoChange) {
 			fmt.Println("no changes")

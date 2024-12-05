@@ -12,3 +12,5 @@ type UserRepository interface {
 	Update(ctx context.Context, user *models.User) error
 	Delete(ctx context.Context, id string) error
 }
+
+// почему интерфейс по месту объявления а не использования? 

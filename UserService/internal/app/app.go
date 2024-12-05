@@ -49,6 +49,8 @@ func (a *App) initDeps(ctx context.Context) error {
 		err := f(ctx)
 		if err != nil {
 			return err
+			// ошибки нужно оборачивать 
+			// https://github.com/uber-go/guide/blob/master/style.md#error-wrapping
 		}
 	}
 
@@ -59,6 +61,7 @@ func (a *App) initConfig(_ context.Context) error {
 	err := config.Load(".env")
 	if err != nil {
 		return err
+		// то же самое про ошибки, как эксплуатация должна понять что ошибка на стации инита конфигов?
 	}
 
 	return nil
@@ -86,12 +89,17 @@ func (a *App) runGRPCServer() error {
 	list, err := net.Listen("tcp", a.serviceProvider.GRPCConfig().Address())
 	if err != nil {
 		return err
+		// врапинг
 	}
 
 	err = a.grpcServer.Serve(list)
 	if err != nil {
 		return err
 	}
+	// почитайте про https://go.dev/tour/flowcontrol/6
+	// if err := something(); err != nil {
+	// 		return err 
+	// }
 
 	return nil
 }
