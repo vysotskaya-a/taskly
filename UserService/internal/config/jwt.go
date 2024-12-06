@@ -2,8 +2,16 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"time"
+)
+
+var (
+	errRefreshTokenSecretNotFound     = errors.New("refresh token secret not found")
+	errRefreshTokenExpirationNotFound = errors.New("refresh token expiration not found")
+	errAccessTokenSecretNotFound      = errors.New("access token secret not found")
+	errAccessTokenExpirationNotFound  = errors.New("access token expiration not found")
 )
 
 const (
@@ -30,38 +38,31 @@ type jwtConfig struct {
 func NewJWTConfig() (JWTConfig, error) {
 	refreshTokenSecret := os.Getenv(refreshTokenSecretEnvName)
 	if len(refreshTokenSecret) == 0 {
-		return nil, errors.New("refresh token secret not found")
-				// https://github.com/uber-go/guide/blob/master/style.md#error-types
-
+		return nil, errRefreshTokenSecretNotFound
 	}
 
 	refreshTokenExpirationStr := os.Getenv(refreshTokenExpirationEnvName)
 	if len(refreshTokenSecret) == 0 {
-		return nil, errors.New("refresh token expiration not found")
-				// https://github.com/uber-go/guide/blob/master/style.md#error-types
-
+		return nil, errRefreshTokenExpirationNotFound
 	}
 	refreshTokenExpiration, err := time.ParseDuration(refreshTokenExpirationStr)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse refresh token expiration: %w", err)
 	}
 
 	accessTokenSecret := os.Getenv(accessTokenSecretEnvName)
 	if len(refreshTokenSecret) == 0 {
-		return nil, errors.New("access token secret not found")
-				// https://github.com/uber-go/guide/blob/master/style.md#error-types
-
+		return nil, errAccessTokenSecretNotFound
 	}
 
 	accessTokenExpirationStr := os.Getenv(accessTokenExpirationEnvName)
 	if len(refreshTokenSecret) == 0 {
-		return nil, errors.New("access token expiration not found")
-				// https://github.com/uber-go/guide/blob/master/style.md#error-types
+		return nil, errAccessTokenExpirationNotFound
 
 	}
 	accessTokenExpiration, err := time.ParseDuration(accessTokenExpirationStr)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse access token expiration: %w", err)
 	}
 
 	return &jwtConfig{

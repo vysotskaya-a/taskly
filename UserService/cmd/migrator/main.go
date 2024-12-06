@@ -25,7 +25,7 @@ func main() {
 	connection, _ = os.LookupEnv(pgConnEnvName)
 
 	if migrationDir == "" || connection == "" {
-		log.Println("MIGRATION_PATH and DB_CONNECTION env vars must be set")
+		log.Println("MIGRATION_DIR and PG_CONN env vars must be set")
 		return
 	}
 
