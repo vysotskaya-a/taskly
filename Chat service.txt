@@ -1,0 +1,1 @@
+Написал часть chat service + логику работы с web socket на стороне api gateway. Добавил тестовые docker compose и nginx для возможности потыкать chat service.
