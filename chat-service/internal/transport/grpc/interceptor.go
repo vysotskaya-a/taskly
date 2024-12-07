@@ -27,7 +27,9 @@ func logError(ctx context.Context, l logger.Logger, h any, info *grpc.UnaryServe
 	code := codes.Internal
 	if customErr := errorz.Parse(err); customErr != nil {
 		code = codes.Code(customErr.StatusCode())
-		l.Error(ctx, err.Error())
+		if code == codes.Internal {
+			l.Error(ctx, err.Error())
+		}
 		if !reflect.ValueOf(h).IsNil() {
 			return h, nil
 		}

@@ -34,7 +34,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./conf/nginx/external/nginx.conf:/etc/nginx/nginx.conf
+      - ./conf/nginx/test/chat/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - server1
       - server2

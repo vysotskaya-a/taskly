@@ -11,6 +11,10 @@ import (
 	"google.golang.org/grpc/codes"
 )
 
+const (
+	prefix = "chat-service-grpc"
+)
+
 type ChatService interface {
 	AddUserToChat(ctx context.Context, userID string, projectID string) error
 	CreateChat(ctx context.Context, chat *entity.Chat) (string, error)
@@ -22,6 +26,9 @@ type ChatService interface {
 }
 
 func (s *Server) AddUserToChat(ctx context.Context, req *api.AddUserToChatRequest) (*api.AddUserToChatResponse, error) {
+	if req.GetUserId() == "" || req.GetProjectId() == "" {
+		return nil, errorz.BadRequest()
+	}
 	err := s.chatService.AddUserToChat(ctx, req.GetUserId(), req.GetProjectId())
 	if err != nil {
 		if err := errorz.Parse(err); err != nil {
@@ -31,11 +38,14 @@ func (s *Server) AddUserToChat(ctx context.Context, req *api.AddUserToChatReques
 		}
 		return nil, err
 	}
-	logger.GetLogger(ctx).Info(ctx, "User added to chat", zap.String("user_id", req.UserId), zap.String("project_id", req.ProjectId))
+	logger.GetLogger(ctx).Info(ctx, "User added to chat", zap.String("user_id", req.GetUserId()), zap.String("project_id", req.GetProjectId()))
 	return &api.AddUserToChatResponse{ProjectId: req.ProjectId}, nil
 }
 
 func (s *Server) CreateChat(ctx context.Context, req *api.CreateChatRequest) (*api.CreateChatResponse, error) {
+	if req.GetProjectId() == "" || req.GetName() == "" {
+		return nil, errorz.BadRequest()
+	}
 	chatId, err := s.chatService.CreateChat(ctx, &entity.Chat{
 		ProjectID: req.GetProjectId(),
 		Members:   req.GetMember(),
@@ -49,6 +59,9 @@ func (s *Server) CreateChat(ctx context.Context, req *api.CreateChatRequest) (*a
 }
 
 func (s *Server) GetMessages(ctx context.Context, req *api.GetMessagesRequest) (*api.GetMessagesResponse, error) {
+	if req.GetUserId() == "" || req.GetProjectId() == "" || req.GetLimit() == 0 || req.GetCursor() == 0 {
+		return nil, errorz.BadRequest()
+	}
 	messages, err := s.chatService.GetMessages(ctx, req.GetUserId(), req.GetProjectId(), int(req.Limit), int(req.Cursor))
 	if err != nil {
 		if err := errorz.Parse(err); err != nil {
@@ -74,6 +87,9 @@ func (s *Server) GetMessages(ctx context.Context, req *api.GetMessagesRequest) (
 }
 
 func (s *Server) GetChatUsers(ctx context.Context, req *api.GetChatUsersRequest) (*api.GetChatUsersResponse, error) {
+	if req.GetProjectId() == "" {
+		return nil, errorz.BadRequest()
+	}
 	users, err := s.chatService.GetChatUsers(ctx, req.GetProjectId())
 	if err != nil {
 		if err := errorz.Parse(err); err != nil {
@@ -88,6 +104,9 @@ func (s *Server) GetChatUsers(ctx context.Context, req *api.GetChatUsersRequest)
 }
 
 func (s *Server) GetUserChats(ctx context.Context, req *api.GetUserChatsRequest) (*api.GetUserChatsResponse, error) {
+	if req.GetUserId() == "" {
+		return nil, errorz.BadRequest()
+	}
 	chats, err := s.chatService.GetUserChats(ctx, req.GetUserId())
 	if err != nil {
 		if err := errorz.Parse(err); err != nil {
@@ -101,6 +120,9 @@ func (s *Server) GetUserChats(ctx context.Context, req *api.GetUserChatsRequest)
 }
 
 func (s *Server) RemoveUserFromChat(ctx context.Context, req *api.RemoveUserFromChatRequest) (*api.RemoveUserFromChatResponse, error) {
+	if req.GetUserId() == "" || req.GetProjectId() == "" {
+		return nil, errorz.BadRequest()
+	}
 	err := s.chatService.RemoveUserFromChat(ctx, req.GetUserId(), req.GetProjectId())
 	if err != nil {
 		if err := errorz.Parse(err); err != nil {
@@ -115,6 +137,9 @@ func (s *Server) RemoveUserFromChat(ctx context.Context, req *api.RemoveUserFrom
 }
 
 func (s *Server) GetChat(ctx context.Context, req *api.GetChatRequest) (*api.GetChatResponse, error) {
+	if req.GetProjectId() == "" {
+		return nil, errorz.BadRequest()
+	}
 	chat, err := s.chatService.GetChat(ctx, req.GetProjectId())
 	if err != nil {
 		if err := errorz.Parse(err); err != nil {
@@ -124,11 +149,6 @@ func (s *Server) GetChat(ctx context.Context, req *api.GetChatRequest) (*api.Get
 		}
 		return nil, err
 	}
-	return &api.GetChatResponse{Chat: &api.Chat{Members: chat.Members, Name: chat.Name, ProjectId: chat.ProjectID, ChatId: chat.GetID()}}, nil
-}
-
-// mustEmbedUnimplementedChatServiceServer implements chat_v1.ChatServiceServer.
-// Subtle: this method shadows the method (UnsafeChatServiceServer).mustEmbedUnimplementedChatServiceServer of Server.UnsafeChatServiceServer.
-func (s *Server) mustEmbedUnimplementedChatServiceServer() {
-	panic("unimplemented")
+	return &api.GetChatResponse{Chat: &api.Chat{Members: chat.Members, Name: chat.Name,
+		ProjectId: chat.ProjectID, ChatId: chat.GetID(), CreatedAt: chat.CreatedAt.String()}}, nil
 }
