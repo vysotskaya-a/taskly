@@ -35,7 +35,7 @@ type serviceProvider struct {
 	taskService    service.TaskService
 
 	projectServer *projectServer.Server
-	taskServer    *taskServer.TaskServer
+	taskServer *taskServer.TaskServer
 }
 
 func newServiceProvider() *serviceProvider {
@@ -101,6 +101,7 @@ func (s *serviceProvider) TaskService(ctx context.Context) service.TaskService {
 	return s.taskService
 }
 
+
 func (s *serviceProvider) ProjectService(ctx context.Context) service.ProjectService {
 	if s.projectService == nil {
 		s.projectService = projectservice.NewService(s.ProjectRepository(ctx))
@@ -116,6 +117,7 @@ func (s *serviceProvider) TaskServer(ctx context.Context) *taskServer.TaskServer
 
 	return s.taskServer
 }
+
 
 func (s *serviceProvider) ProjectServer(ctx context.Context) *projectServer.Server {
 	if s.projectServer == nil {
