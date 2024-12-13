@@ -6,6 +6,7 @@ import (
 	"net"
 	"project-service/internal/closer"
 	"project-service/internal/config"
+	taskpb "project-service/pkg/api/task_v1"
 
 	projectpb "project-service/pkg/api/project_v1"
 
@@ -75,6 +76,7 @@ func (a *App) initGRPCServer(ctx context.Context) error {
 
 	reflection.Register(a.grpcServer)
 	projectpb.RegisterProjectServiceServer(a.grpcServer, a.serviceProvider.ProjectServer(ctx))
+	taskpb.RegisterTaskServiceServer(a.grpcServer, a.serviceProvider.TaskServer(ctx))
 
 	return nil
 }

@@ -1,0 +1,51 @@
+package task
+
+import (
+	"context"
+	"project-service/internal/errorz"
+	"project-service/internal/models"
+	pb "project-service/pkg/api/task_v1"
+)
+
+func (s *Service) Update(ctx context.Context, req *pb.UpdateTaskRequest) error {
+	userID, ok := ctx.Value("user_id").(string)
+	if !ok {
+		return errorz.ErrUserIDNotSet
+	}
+
+	task, err := s.taskRepository.GetByID(ctx, req.GetId())
+	if err != nil {
+		return err
+	}
+
+	project, err := s.projectRepository.GetByID(ctx, task.ProjectId)
+	if err != nil {
+		return err
+	}
+
+	if userID != project.AdminID {
+		return errorz.ErrProjectAccessForbidden
+	}
+
+	s.update(task, req)
+
+	return s.taskRepository.Update(ctx, task)
+}
+
+func (s *Service) update(task *models.Task, req *pb.UpdateTaskRequest) {
+	if req.GetTitle() != "" {
+		task.Title = req.GetTitle()
+	}
+	if req.GetDescription() != "" {
+		task.Description = req.GetDescription()
+	}
+	if req.GetStatus() != "" {
+		task.Status = models.TaskStatus(req.GetStatus())
+	}
+	if req.GetExecutor() != "" {
+		task.ExecutorId = req.GetExecutor()
+	}
+	if req.GetDeadline() != nil {
+		task.Deadline = req.GetDeadline().AsTime()
+	}
+}

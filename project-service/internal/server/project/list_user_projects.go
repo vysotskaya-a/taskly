@@ -20,9 +20,9 @@ func (s *Server) ListUserProjects(ctx context.Context, req *emptypb.Empty) (*pb.
 		return nil, status.Error(codes.Internal, "Failed get user projects.")
 	}
 
-	projectsPB := make([]*pb.Project, len(projects))
+	response := make([]*pb.Project, len(projects))
 	for i, project := range projects {
-		projectsPB[i] = &pb.Project{
+		response[i] = &pb.Project{
 			Id:          project.ID,
 			Title:       project.Title,
 			Description: project.Description,
@@ -33,6 +33,6 @@ func (s *Server) ListUserProjects(ctx context.Context, req *emptypb.Empty) (*pb.
 	}
 
 	return &pb.ListUserProjectsResponse{
-		Project: projectsPB,
+		Project: response,
 	}, nil
 }

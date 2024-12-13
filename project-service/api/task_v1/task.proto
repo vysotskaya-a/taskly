@@ -5,14 +5,13 @@ package task_v1;
 option go_package = "project_service/pkg/api/task_v1";
 
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/empty.proto";
 
 service TaskService {
   rpc CreateTask (CreateTaskRequest) returns (CreateTaskResponse) {}
   rpc GetTaskByID (GetTaskByIDRequest) returns (GetTaskByIDResponse) {}
-  rpc GetTasksByProjectID (GetTasksByProjectIDRequest) returns (GetTasksByProjectIDResponse) {}
-  rpc UpdateTask (UpdateTaskRequest) returns (google.protobuf.Empty) {}
-  rpc DeleteTask (DeleteTaskRequest) returns (google.protobuf.Empty) {}
+  rpc ListTasksByProjectID (ListTasksByProjectIDRequest) returns (ListTasksByProjectIDResponse) {}
+  rpc UpdateTask (UpdateTaskRequest) returns (UpdateTaskResponse) {}
+  rpc DeleteTask (DeleteTaskRequest) returns (DeleteTaskResponse) {}
 }
 
 message Task {
@@ -48,11 +47,11 @@ message GetTaskByIDResponse {
   Task task = 1;
 }
 
-message GetTasksByProjectIDRequest {
+message ListTasksByProjectIDRequest {
   string project_id = 1;
 }
 
-message GetTasksByProjectIDResponse {
+message ListTasksByProjectIDResponse {
   repeated Task tasks = 1;
 }
 

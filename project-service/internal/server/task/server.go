@@ -5,11 +5,11 @@ import (
 	pb "project-service/pkg/api/task_v1"
 )
 
-type TaskServer struct {
+type Server struct {
 	pb.UnimplementedTaskServiceServer
 	taskService service.TaskService
 }
 
-func NewTaskServer(taskService service.TaskService) *TaskServer {
-	return &TaskServer{taskService: taskService}
+func NewServer(taskService service.TaskService) *Server {
+	return &Server{taskService: taskService}
 }

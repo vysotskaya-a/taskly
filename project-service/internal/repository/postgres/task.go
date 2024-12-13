@@ -29,8 +29,8 @@ type TaskRepository struct {
 
 func NewTaskRepository(db *sqlx.DB) *TaskRepository { return &TaskRepository{db: db} }
 
-func (r *TaskRepository) CreateTask(ctx context.Context, task *models.Task) (string, error) {
-	const op = "Postgres.ProjectRepository.CreateTask"
+func (r *TaskRepository) Create(ctx context.Context, task *models.Task) (string, error) {
+	const op = "Postgres.ProjectRepository.Create"
 
 	builder := sq.Insert(tasksTableName).
 		Columns(tasksTitleColumn, tasksDescriptionColumn, tasksStatusColumn, tasksProjectIDColumn, tasksExecutorIDColumn, tasksDeadlineColumn, tasksCreatedAtColumn).
@@ -50,8 +50,8 @@ func (r *TaskRepository) CreateTask(ctx context.Context, task *models.Task) (str
 	return id, nil
 }
 
-func (r *TaskRepository) GetTaskByID(ctx context.Context, id string) (*models.Task, error) {
-	const op = "Postgres.ProjectRepository.GetTaskByID"
+func (r *TaskRepository) GetByID(ctx context.Context, id string) (*models.Task, error) {
+	const op = "Postgres.ProjectRepository.GetByID"
 
 	builder := sq.Select(tasksIDColumn, tasksTitleColumn, tasksDescriptionColumn, tasksStatusColumn, tasksProjectIDColumn, tasksExecutorIDColumn, tasksDeadlineColumn, tasksCreatedAtColumn, tasksUpdatedAtColumn).
 		From(tasksTableName).
@@ -71,8 +71,8 @@ func (r *TaskRepository) GetTaskByID(ctx context.Context, id string) (*models.Ta
 	return &task, nil
 }
 
-func (r *TaskRepository) GetTasksByProjectID(ctx context.Context, projectID string) ([]models.Task, error) {
-	const op = "Postgres.ProjectRepository.GetTasksByProjectID"
+func (r *TaskRepository) GetAllByProjectID(ctx context.Context, projectID string) ([]*models.Task, error) {
+	const op = "Postgres.ProjectRepository.GetAllByProjectID"
 
 	builder := sq.Select(tasksIDColumn, tasksTitleColumn, tasksDescriptionColumn, tasksStatusColumn, tasksProjectIDColumn, tasksExecutorIDColumn, tasksDeadlineColumn).
 		From(tasksTableName).
@@ -84,15 +84,15 @@ func (r *TaskRepository) GetTasksByProjectID(ctx context.Context, projectID stri
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	var tasks []models.Task
+	var tasks []*models.Task
 	if err = r.db.SelectContext(ctx, &tasks, query, args...); err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 	return tasks, nil
 }
 
-func (r *TaskRepository) UpdateTask(ctx context.Context, task *models.Task) error {
-	const op = "Postgres.ProjectRepository.UpdateTask"
+func (r *TaskRepository) Update(ctx context.Context, task *models.Task) error {
+	const op = "Postgres.ProjectRepository.Update"
 
 	builder := sq.Update(tasksTableName).
 		Set(tasksTitleColumn, task.Title).
@@ -101,7 +101,7 @@ func (r *TaskRepository) UpdateTask(ctx context.Context, task *models.Task) erro
 		Set(tasksExecutorIDColumn, task.ExecutorId).
 		Set(tasksDeadlineColumn, task.Deadline).
 		Set(tasksUpdatedAtColumn, sq.Expr("NOW()")).
-		Where(sq.Eq{tasksIDColumn: task.Id}).
+		Where(sq.Eq{tasksIDColumn: task.ID}).
 		PlaceholderFormat(sq.Dollar)
 
 	query, args, err := builder.ToSql()
@@ -124,8 +124,8 @@ func (r *TaskRepository) UpdateTask(ctx context.Context, task *models.Task) erro
 	return nil
 }
 
-func (r *TaskRepository) DeleteTask(ctx context.Context, id string) error {
-	const op = "Postgres.ProjectRepository.DeleteTask"
+func (r *TaskRepository) Delete(ctx context.Context, id string) error {
+	const op = "Postgres.ProjectRepository.Delete"
 
 	builder := sq.Delete(tasksTableName).
 		Where(sq.Eq{tasksIDColumn: id}).

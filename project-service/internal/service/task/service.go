@@ -2,10 +2,11 @@ package task
 
 import "project-service/internal/repository"
 
-type ServiceTask struct {
-	taskRepo repository.TaskRepository
+type Service struct {
+	taskRepository    repository.TaskRepository
+	projectRepository repository.ProjectRepository
 }
 
-func NewTaskService(taskRepo repository.TaskRepository) *ServiceTask {
-	return &ServiceTask{taskRepo: taskRepo}
+func NewService(taskRepository repository.TaskRepository, projectRepository repository.ProjectRepository) *Service {
+	return &Service{taskRepository: taskRepository, projectRepository: projectRepository}
 }

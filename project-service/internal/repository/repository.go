@@ -14,9 +14,9 @@ type ProjectRepository interface {
 }
 
 type TaskRepository interface {
-	CreateTask(ctx context.Context, task *models.Task) (string, error)
-	GetTasksByProjectID(ctx context.Context, projectID string) ([]models.Task, error)
-	GetTaskByID(ctx context.Context, id string) (*models.Task, error)
-	UpdateTask(ctx context.Context, task *models.Task) error
-	DeleteTask(ctx context.Context, id string) error
+	Create(ctx context.Context, task *models.Task) (string, error)
+	GetAllByProjectID(ctx context.Context, projectID string) ([]*models.Task, error)
+	GetByID(ctx context.Context, id string) (*models.Task, error)
+	Update(ctx context.Context, task *models.Task) error
+	Delete(ctx context.Context, id string) error
 }
