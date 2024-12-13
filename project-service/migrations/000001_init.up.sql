@@ -7,10 +7,10 @@ CREATE TABLE IF NOT EXISTS projects (
     users UUID[] NOT NULL,
     admin_id UUID NOT NULL,
     created_at timestamptz NOT NULL DEFAULT now()
-)
+);
 
 CREATE TABLE IF NOT EXISTS tasks (
-                                     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title TEXT NOT NULL,
     description TEXT,
     status TEXT NOT NULL,
@@ -19,4 +19,4 @@ CREATE TABLE IF NOT EXISTS tasks (
     deadline timestamptz,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now()
-    );
+);

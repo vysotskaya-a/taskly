@@ -63,6 +63,19 @@ func (s *serviceProvider) GRPCConfig() config.GRPCConfig {
 	return s.grpcConfig
 }
 
+func (s *serviceProvider) JWTConfig() config.JWTConfig {
+	if s.jwtConfig == nil {
+		cfg, err := config.NewJWTConfig()
+		if err != nil {
+			panic(fmt.Errorf("failed to get jwt config: %w", err))
+		}
+
+		s.jwtConfig = cfg
+	}
+
+	return s.jwtConfig
+}
+
 func (s *serviceProvider) DBClient(ctx context.Context) *sqlx.DB {
 	if s.db == nil {
 		database := db.Init(s.PGConfig().PGConn())
@@ -99,7 +112,7 @@ func (s *serviceProvider) UserServer(ctx context.Context) *userServer.Server {
 
 func (s *serviceProvider) AuthService(ctx context.Context) service.AuthService {
 	if s.authService == nil {
-		s.authService = authService.NewService(s.UserRepository(ctx))
+		s.authService = authService.NewService(s.UserRepository(ctx), s.JWTConfig())
 	}
 
 	return s.authService

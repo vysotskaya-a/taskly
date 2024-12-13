@@ -11,6 +11,6 @@ type Service struct {
 	userRepository repository.UserRepository
 }
 
-func NewService(userRepository repository.UserRepository) *Service {
-	return &Service{userRepository: userRepository}
+func NewService(userRepository repository.UserRepository, jwtConfig config.JWTConfig) *Service {
+	return &Service{userRepository: userRepository, jwtConfig: jwtConfig}
 }
