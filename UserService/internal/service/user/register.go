@@ -2,11 +2,22 @@ package user
 
 import (
 	"context"
+	"errors"
 	"golang.org/x/crypto/bcrypt"
+	"user-service/internal/errorz"
 	"user-service/internal/models"
 )
 
 func (s *Service) Register(ctx context.Context, user *models.User) (string, error) {
+	user, err := s.userRepository.GetByEmail(ctx, user.Email)
+	switch {
+	case err == nil:
+		return user.ID, nil
+
+	case !errors.Is(err, errorz.ErrUserNotFound):
+		return "", err
+	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
