@@ -8,7 +8,7 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 service ProjectService {
-  rpc CreateProject(CreateRequest) returns (CreateResponse) {}
+  rpc CreateProject(CreateProjectRequest) returns (CreateProjectResponse) {}
   rpc GetProject(GetProjectRequest) returns (GetProjectResponse) {}
   rpc ListUserProjects(google.protobuf.Empty) returns (ListUserProjectsResponse) {}
   rpc UpdateProject(UpdateProjectRequest) returns (google.protobuf.Empty) {}
@@ -25,13 +25,13 @@ message Project {
   google.protobuf.Timestamp created_at = 6;
 }
 
-message CreateRequest {
+message CreateProjectRequest {
   string title = 1;
   string description = 2;
   repeated string users = 3;
 }
 
-message CreateResponse {
+message CreateProjectResponse {
   string id = 1;
 }
 

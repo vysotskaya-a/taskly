@@ -3,6 +3,10 @@ package errorz
 import "errors"
 
 var (
-	ErrProjectNotFound = errors.New("project not found")
-	ErrTaskNotFound    = errors.New("task not found")
+	ErrUserIDNotSet = errors.New("user_id not set")
+
+	ErrProjectNotFound        = errors.New("project not found")
+	ErrProjectAccessForbidden = errors.New("project access forbidden")
+
+	ErrTaskNotFound = errors.New("task not found")
 )

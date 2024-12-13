@@ -5,13 +5,13 @@ import (
 	"project-service/internal/errorz"
 )
 
-func (s *Service) Delete(ctx context.Context, id string) error {
+func (s *Service) AddUser(ctx context.Context, newUserID, projectID string) error {
 	userID, ok := ctx.Value("user_id").(string)
 	if !ok {
 		return errorz.ErrUserIDNotSet
 	}
 
-	project, err := s.projectRepository.GetByID(ctx, id)
+	project, err := s.projectRepository.GetByID(ctx, projectID)
 	if err != nil {
 		return err
 	}
@@ -20,5 +20,7 @@ func (s *Service) Delete(ctx context.Context, id string) error {
 		return errorz.ErrProjectAccessForbidden
 	}
 
-	return s.projectRepository.Delete(ctx, id)
+	project.Users = append(project.Users, newUserID)
+
+	return s.projectRepository.Update(ctx, project)
 }
