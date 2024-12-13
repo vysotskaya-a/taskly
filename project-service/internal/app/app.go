@@ -3,14 +3,16 @@ package app
 import (
 	"context"
 	"fmt"
+	"net"
+	"project-service/internal/closer"
+	"project-service/internal/config"
+	taskpb "project-service/pkg/api/task_v1"
+
+	projectpb "project-service/pkg/api/project_v1"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
-	"net"
-	"user-service/internal/closer"
-	"user-service/internal/config"
-	authpb "user-service/pkg/api/auth_v1"
-	userpb "user-service/pkg/api/user_v1"
 )
 
 type App struct {
@@ -23,7 +25,7 @@ func NewApp(ctx context.Context) (*App, error) {
 
 	err := a.initDeps(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("new app: %w", err)
+		return nil, err
 	}
 
 	return a, nil
@@ -48,7 +50,7 @@ func (a *App) initDeps(ctx context.Context) error {
 	for _, f := range inits {
 		err := f(ctx)
 		if err != nil {
-			return fmt.Errorf("init deps: %w", err)
+			return err
 		}
 	}
 
@@ -58,7 +60,7 @@ func (a *App) initDeps(ctx context.Context) error {
 func (a *App) initConfig(_ context.Context) error {
 	err := config.Load(".env")
 	if err != nil {
-		return fmt.Errorf("init config: %w", err)
+		return err
 	}
 
 	return nil
@@ -73,9 +75,8 @@ func (a *App) initGRPCServer(ctx context.Context) error {
 	a.grpcServer = grpc.NewServer(grpc.Creds(insecure.NewCredentials()))
 
 	reflection.Register(a.grpcServer)
-
-	userpb.RegisterUserV1Server(a.grpcServer, a.serviceProvider.UserServer(ctx))
-	authpb.RegisterAuthV1Server(a.grpcServer, a.serviceProvider.AuthServer(ctx))
+	projectpb.RegisterProjectServiceServer(a.grpcServer, a.serviceProvider.ProjectServer(ctx))
+	taskpb.RegisterTaskServiceServer(a.grpcServer, a.serviceProvider.TaskServer(ctx))
 
 	return nil
 }
@@ -85,12 +86,12 @@ func (a *App) runGRPCServer() error {
 
 	list, err := net.Listen("tcp", a.serviceProvider.GRPCConfig().Address())
 	if err != nil {
-		return fmt.Errorf("listen tcp: %w", err)
-
+		return err
 	}
 
-	if err = a.grpcServer.Serve(list); err != nil {
-		return fmt.Errorf("serve grpc: %w", err)
+	err = a.grpcServer.Serve(list)
+	if err != nil {
+		return err
 	}
 
 	return nil
