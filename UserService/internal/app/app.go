@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 	"net"
 	"user-service/internal/closer"
@@ -69,6 +70,8 @@ func (a *App) initServiceProvider(_ context.Context) error {
 }
 
 func (a *App) initGRPCServer(ctx context.Context) error {
+	a.grpcServer = grpc.NewServer(grpc.Creds(insecure.NewCredentials()))
+
 	reflection.Register(a.grpcServer)
 
 	userpb.RegisterUserV1Server(a.grpcServer, a.serviceProvider.UserServer(ctx))
