@@ -23,7 +23,7 @@ func NewApp(ctx context.Context) (*App, error) {
 
 	err := a.initDeps(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("new app: %w", err)
 	}
 
 	return a, nil
@@ -48,7 +48,7 @@ func (a *App) initDeps(ctx context.Context) error {
 	for _, f := range inits {
 		err := f(ctx)
 		if err != nil {
-			return err
+			return fmt.Errorf("init deps: %w", err)
 		}
 	}
 
@@ -58,7 +58,7 @@ func (a *App) initDeps(ctx context.Context) error {
 func (a *App) initConfig(_ context.Context) error {
 	err := config.Load(".env")
 	if err != nil {
-		return err
+		return fmt.Errorf("init config: %w", err)
 	}
 
 	return nil
@@ -85,12 +85,12 @@ func (a *App) runGRPCServer() error {
 
 	list, err := net.Listen("tcp", a.serviceProvider.GRPCConfig().Address())
 	if err != nil {
-		return err
+		return fmt.Errorf("listen tcp: %w", err)
+
 	}
 
-	err = a.grpcServer.Serve(list)
-	if err != nil {
-		return err
+	if err = a.grpcServer.Serve(list); err != nil {
+		return fmt.Errorf("serve grpc: %w", err)
 	}
 
 	return nil

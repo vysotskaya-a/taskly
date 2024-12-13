@@ -41,7 +41,7 @@ func (s *serviceProvider) PGConfig() config.PGConfig {
 	if s.pgConfig == nil {
 		cfg, err := config.NewPGConfig()
 		if err != nil {
-			panic(fmt.Errorf("failed to get pg config: %s", err.Error()))
+			panic(fmt.Errorf("failed to get pg config: %w", err))
 		}
 
 		s.pgConfig = cfg
@@ -54,7 +54,7 @@ func (s *serviceProvider) GRPCConfig() config.GRPCConfig {
 	if s.grpcConfig == nil {
 		cfg, err := config.NewGRPCConfig()
 		if err != nil {
-			panic(fmt.Errorf("failed to get grpc config: %s", err.Error()))
+			panic(fmt.Errorf("failed to get grpc config: %w", err))
 		}
 
 		s.grpcConfig = cfg
@@ -112,3 +112,9 @@ func (s *serviceProvider) AuthServer(ctx context.Context) *authServer.Server {
 
 	return s.authServer
 }
+
+// не совсем понял зачем нужны эти функции поясните плиз
+
+// это DI контейнер. Все инициализации происходят здесь(к примеру, чтобы инициализировать UserRepository в конструктор
+// к нему передастся функция s.DBClient(ctx), которая в свою очередь либо вернёт уже инициализированную бд, либо
+// инициализирует её и потом вернёт). Можно сказать это упрощённая версия DI контейнера FX от Uber.

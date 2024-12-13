@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	"user-service/internal/errorz"
 
@@ -32,6 +33,8 @@ func NewUserRepository(db *sqlx.DB) *UserRepository {
 
 // Create создаёт нового пользователя.
 func (r *UserRepository) Create(ctx context.Context, user *models.User) (string, error) {
+	const op = "Postgres.UserRepository.Create"
+
 	builder := sq.Insert(usersTableName).
 		Columns(usersEmailColumn, usersPasswordHashColumn, usersGradeColumn).
 		Values(user.Email, user.Password, user.Grade).
@@ -40,19 +43,20 @@ func (r *UserRepository) Create(ctx context.Context, user *models.User) (string,
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
 	var id string
-	err = r.db.QueryRowContext(ctx, query, args...).Scan(&id)
-	if err != nil {
-		return "", err
+	if err = r.db.QueryRowContext(ctx, query, args...).Scan(&id); err != nil {
+		return "", fmt.Errorf("%s: %w", op, err)
 	}
 	return id, nil
 }
 
 // GetByID получает пользователя по его ID.
 func (r *UserRepository) GetByID(ctx context.Context, id string) (*models.User, error) {
+	const op = "Postgres.UserRepository.GetByID"
+
 	builder := sq.Select(usersIDColumn, usersEmailColumn, usersPasswordHashColumn, usersGradeColumn, usersCreatedAtColumn).
 		From(usersTableName).
 		Where(sq.Eq{usersIDColumn: id}).
@@ -61,22 +65,24 @@ func (r *UserRepository) GetByID(ctx context.Context, id string) (*models.User, 
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
 	var user models.User
 	err = r.db.GetContext(ctx, &user, query, args...)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errorz.ErrUserNotFound
+			return nil, fmt.Errorf("%s: %w", op, errorz.ErrUserNotFound)
 		}
-		return nil, err
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 	return &user, nil
 }
 
 // GetByEmail получает пользователя по его почте.
 func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*models.User, error) {
+	const op = "Postgres.UserRepository.GetByEmail"
+
 	builder := sq.Select(usersIDColumn, usersEmailColumn, usersPasswordHashColumn, usersGradeColumn, usersCreatedAtColumn).
 		From(usersTableName).
 		Where(sq.Eq{usersEmailColumn: email}).
@@ -85,22 +91,24 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*models.
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
 	var user models.User
 	err = r.db.GetContext(ctx, &user, query, args...)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errorz.ErrUserNotFound
+			return nil, fmt.Errorf("%s: %w", op, errorz.ErrUserNotFound)
 		}
-		return nil, err
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 	return &user, nil
 }
 
 // Update обновляет данные пользователя.
 func (r *UserRepository) Update(ctx context.Context, user *models.User) error {
+	const op = "Postgres.UserRepository.Update"
+
 	builder := sq.Update(usersTableName).
 		Set(usersPasswordHashColumn, user.Password).
 		Set(usersGradeColumn, user.Grade).
@@ -109,20 +117,20 @@ func (r *UserRepository) Update(ctx context.Context, user *models.User) error {
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", op, err)
 	}
 
 	result, err := r.db.ExecContext(ctx, query, args...)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", op, err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", op, err)
 	}
 	if rowsAffected == 0 {
-		return errorz.ErrUserNotFound
+		return fmt.Errorf("%s: %w", op, errorz.ErrUserNotFound)
 	}
 
 	return nil
@@ -130,26 +138,28 @@ func (r *UserRepository) Update(ctx context.Context, user *models.User) error {
 
 // Delete удаляет пользователя по его ID.
 func (r *UserRepository) Delete(ctx context.Context, id string) error {
+	const op = "Postgres.UserRepository.Delete"
+
 	builder := sq.Delete(usersTableName).
 		Where(sq.Eq{usersIDColumn: id}).
 		PlaceholderFormat(sq.Dollar)
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", op, err)
 	}
 
 	result, err := r.db.ExecContext(ctx, query, args...)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", op, err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", op, err)
 	}
 	if rowsAffected == 0 {
-		return errorz.ErrUserNotFound
+		return fmt.Errorf("%s: %w", op, errorz.ErrUserNotFound)
 	}
 
 	return nil
