@@ -2,6 +2,7 @@ package project
 
 import (
 	"context"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"project-service/internal/models"
@@ -23,6 +24,7 @@ func (s *Server) CreateProject(ctx context.Context, req *pb.CreateProjectRequest
 
 	projectID, err := s.projectService.Create(ctx, project)
 	if err != nil {
+		log.Error().Err(err).Msg("error while creating project")
 		return nil, status.Error(codes.Internal, "Failed to create project.")
 	}
 

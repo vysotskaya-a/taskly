@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
@@ -11,6 +12,7 @@ import (
 	"user-service/internal/config"
 	authpb "user-service/pkg/api/auth_v1"
 	userpb "user-service/pkg/api/user_v1"
+	"user-service/pkg/zlog"
 )
 
 type App struct {
@@ -42,6 +44,7 @@ func (a *App) initDeps(ctx context.Context) error {
 	inits := []func(context.Context) error{
 		a.initConfig,
 		a.initServiceProvider,
+		a.initLogger,
 		a.initGRPCServer,
 	}
 
@@ -80,13 +83,20 @@ func (a *App) initGRPCServer(ctx context.Context) error {
 	return nil
 }
 
+func (a *App) initLogger(_ context.Context) error {
+	cfg := a.serviceProvider.LoggerConfig()
+
+	log.Logger = zlog.Default(cfg.IsPretty(), cfg.Version(), cfg.LogLevel())
+
+	return nil
+}
+
 func (a *App) runGRPCServer() error {
 	fmt.Println("GRPC сервер запущен")
 
 	list, err := net.Listen("tcp", a.serviceProvider.GRPCConfig().Address())
 	if err != nil {
 		return fmt.Errorf("listen tcp: %w", err)
-
 	}
 
 	if err = a.grpcServer.Serve(list); err != nil {

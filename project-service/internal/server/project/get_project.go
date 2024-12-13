@@ -3,6 +3,7 @@ package project
 import (
 	"context"
 	"errors"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -23,6 +24,7 @@ func (s *Server) GetProject(ctx context.Context, req *pb.GetProjectRequest) (*pb
 		return nil, status.Error(codes.PermissionDenied, "Access denied for this project.")
 
 	case err != nil:
+		log.Error().Err(err).Msg("error while getting project")
 		return nil, status.Error(codes.Internal, "Failed to get project.")
 	}
 

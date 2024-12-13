@@ -3,10 +3,12 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"net"
 	"project-service/internal/closer"
 	"project-service/internal/config"
 	taskpb "project-service/pkg/api/task_v1"
+	"project-service/pkg/zlog"
 
 	projectpb "project-service/pkg/api/project_v1"
 
@@ -25,7 +27,7 @@ func NewApp(ctx context.Context) (*App, error) {
 
 	err := a.initDeps(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("new app: %w", err)
 	}
 
 	return a, nil
@@ -44,13 +46,14 @@ func (a *App) initDeps(ctx context.Context) error {
 	inits := []func(context.Context) error{
 		a.initConfig,
 		a.initServiceProvider,
+		a.initLogger,
 		a.initGRPCServer,
 	}
 
 	for _, f := range inits {
 		err := f(ctx)
 		if err != nil {
-			return err
+			return fmt.Errorf("init deps: %w", err)
 		}
 	}
 
@@ -60,7 +63,7 @@ func (a *App) initDeps(ctx context.Context) error {
 func (a *App) initConfig(_ context.Context) error {
 	err := config.Load(".env")
 	if err != nil {
-		return err
+		return fmt.Errorf("init config: %w", err)
 	}
 
 	return nil
@@ -81,17 +84,24 @@ func (a *App) initGRPCServer(ctx context.Context) error {
 	return nil
 }
 
+func (a *App) initLogger(_ context.Context) error {
+	cfg := a.serviceProvider.LoggerConfig()
+
+	log.Logger = zlog.Default(cfg.IsPretty(), cfg.Version(), cfg.LogLevel())
+
+	return nil
+}
+
 func (a *App) runGRPCServer() error {
 	fmt.Println("GRPC сервер запущен")
 
 	list, err := net.Listen("tcp", a.serviceProvider.GRPCConfig().Address())
 	if err != nil {
-		return err
+		return fmt.Errorf("listen tcp: %w", err)
 	}
 
-	err = a.grpcServer.Serve(list)
-	if err != nil {
-		return err
+	if err = a.grpcServer.Serve(list); err != nil {
+		return fmt.Errorf("serve grpc: %w", err)
 	}
 
 	return nil

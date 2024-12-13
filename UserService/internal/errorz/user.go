@@ -5,6 +5,8 @@ import "errors"
 var (
 	ErrUserNotFound         = errors.New("user not found")
 	ErrPasswordDoesNotMatch = errors.New("password does not match")
+	ErrUserIDNotSet         = errors.New("user_id not set")
+	ErrUserAccessDenied     = errors.New("user access denied")
 )
 
 // вот тут применение errors.New разумно, только почему пакет называется errorZ?)))

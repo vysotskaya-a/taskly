@@ -2,15 +2,25 @@ package user
 
 import (
 	"context"
+	"errors"
+	"github.com/rs/zerolog/log"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"user-service/internal/errorz"
 	pb "user-service/pkg/api/user_v1"
 )
 
 func (s *Server) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
 	// Логика получения пользователя
-	user, err := s.userService.GetUserByID(ctx, req.GetId())
-	if err != nil {
-		return nil, err
+	user, err := s.userService.GetByID(ctx, req.GetId())
+	switch {
+	case errors.Is(err, errorz.ErrUserNotFound):
+		return nil, status.Error(codes.NotFound, "User with this ID not found.")
+
+	case err != nil:
+		log.Error().Err(err).Msg("error while getting user")
+		return nil, status.Error(codes.Internal, "Failed to get user.")
 	}
 
 	return &pb.GetUserResponse{

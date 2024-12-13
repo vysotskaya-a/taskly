@@ -24,8 +24,9 @@ import (
 )
 
 type serviceProvider struct {
-	pgConfig   config.PGConfig
-	grpcConfig config.GRPCConfig
+	pgConfig     config.PGConfig
+	grpcConfig   config.GRPCConfig
+	loggerConfig config.LoggerConfig
 
 	db                *sqlx.DB
 	projectRepository repository.ProjectRepository
@@ -46,7 +47,7 @@ func (s *serviceProvider) PGConfig() config.PGConfig {
 	if s.pgConfig == nil {
 		cfg, err := config.NewPGConfig()
 		if err != nil {
-			panic(fmt.Errorf("failed to get pg config: %s", err.Error()))
+			panic(fmt.Errorf("failed to get pg config: %w", err))
 		}
 
 		s.pgConfig = cfg
@@ -59,13 +60,26 @@ func (s *serviceProvider) GRPCConfig() config.GRPCConfig {
 	if s.grpcConfig == nil {
 		cfg, err := config.NewGRPCConfig()
 		if err != nil {
-			panic(fmt.Errorf("failed to get grpc config: %s", err.Error()))
+			panic(fmt.Errorf("failed to get grpc config: %w", err))
 		}
 
 		s.grpcConfig = cfg
 	}
 
 	return s.grpcConfig
+}
+
+func (s *serviceProvider) LoggerConfig() config.LoggerConfig {
+	if s.loggerConfig == nil {
+		cfg, err := config.NewLoggerConfig()
+		if err != nil {
+			panic(fmt.Errorf("failed to get logger config: %w", err))
+		}
+
+		s.loggerConfig = cfg
+	}
+
+	return s.loggerConfig
 }
 
 func (s *serviceProvider) DBClient(ctx context.Context) *sqlx.DB {

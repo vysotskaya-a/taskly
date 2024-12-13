@@ -3,6 +3,7 @@ package task
 import (
 	"context"
 	"errors"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"project-service/internal/errorz"
@@ -32,6 +33,7 @@ func (s *Server) CreateTask(ctx context.Context, req *pb.CreateTaskRequest) (*pb
 		return nil, status.Error(codes.PermissionDenied, "Access denied for this task.")
 
 	case err != nil:
+		log.Error().Err(err).Msg("error while creating task")
 		return nil, status.Errorf(codes.Internal, "Failed to create task.")
 	}
 

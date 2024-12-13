@@ -3,6 +3,7 @@ package task
 import (
 	"context"
 	"errors"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -24,6 +25,7 @@ func (s *Server) GetTaskByID(ctx context.Context, req *pb.GetTaskByIDRequest) (*
 		return nil, status.Error(codes.PermissionDenied, "Access denied for this task.")
 
 	case err != nil:
+		log.Error().Err(err).Msg("error while getting task by id")
 		return nil, status.Errorf(codes.Internal, "Failed to get task.")
 	}
 

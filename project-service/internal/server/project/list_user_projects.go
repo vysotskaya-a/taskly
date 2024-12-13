@@ -2,6 +2,7 @@ package project
 
 import (
 	"context"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -17,6 +18,7 @@ func (s *Server) ListUserProjects(ctx context.Context, req *emptypb.Empty) (*pb.
 
 	projects, err := s.projectService.GetAllByUserID(ctx, userID)
 	if err != nil {
+		log.Error().Err(err).Msg("error while listing user projects")
 		return nil, status.Error(codes.Internal, "Failed get user projects.")
 	}
 

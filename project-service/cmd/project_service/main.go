@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"github.com/rs/zerolog/log"
+	"os"
 	"project-service/internal/app"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -13,11 +14,13 @@ func main() {
 
 	a, err := app.NewApp(ctx)
 	if err != nil {
-		panic(fmt.Errorf("failed to init app: %s", err.Error()))
+		log.Error().Err(err).Msg("failed to init app")
+		os.Exit(1)
 	}
 
 	err = a.Run()
 	if err != nil {
-		panic(fmt.Errorf("failed to run app: %s", err.Error()))
+		log.Error().Err(err).Msg("failed to run app")
+		os.Exit(1)
 	}
 }

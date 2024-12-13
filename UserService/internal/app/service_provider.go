@@ -19,9 +19,10 @@ import (
 )
 
 type serviceProvider struct {
-	pgConfig   config.PGConfig
-	grpcConfig config.GRPCConfig
-	jwtConfig  config.JWTConfig
+	pgConfig     config.PGConfig
+	grpcConfig   config.GRPCConfig
+	jwtConfig    config.JWTConfig
+	loggerConfig config.LoggerConfig
 
 	db             *sqlx.DB
 	userRepository repository.UserRepository
@@ -74,6 +75,19 @@ func (s *serviceProvider) JWTConfig() config.JWTConfig {
 	}
 
 	return s.jwtConfig
+}
+
+func (s *serviceProvider) LoggerConfig() config.LoggerConfig {
+	if s.loggerConfig == nil {
+		cfg, err := config.NewLoggerConfig()
+		if err != nil {
+			panic(fmt.Errorf("failed to get logger config: %w", err))
+		}
+
+		s.loggerConfig = cfg
+	}
+
+	return s.loggerConfig
 }
 
 func (s *serviceProvider) DBClient(ctx context.Context) *sqlx.DB {

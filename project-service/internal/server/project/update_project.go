@@ -3,6 +3,7 @@ package project
 import (
 	"context"
 	"errors"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -23,6 +24,7 @@ func (s *Server) UpdateProject(ctx context.Context, req *pb.UpdateProjectRequest
 		return nil, status.Error(codes.PermissionDenied, "Access denied for this project.")
 
 	case err != nil:
+		log.Error().Err(err).Msg("error while updating project")
 		return nil, status.Error(codes.Internal, "Failed to update project.")
 	}
 
