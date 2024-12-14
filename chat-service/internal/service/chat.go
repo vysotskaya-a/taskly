@@ -3,8 +3,14 @@ package service
 import (
 	"chat-service/entity"
 	"chat-service/errorz"
+	"chat-service/pkg/logger"
 	"context"
-	"log"
+	"encoding/json"
+	"fmt"
+	"time"
+
+	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap"
 )
 
 type ChatRepository interface {
@@ -31,13 +37,17 @@ type chatService struct {
 	repo             ChatRepository
 	updatesTransport UpdatesTransport
 	sendCh           chan *entity.Message
+	rdb              *redis.Client
 }
 
-func NewChatService(chatRepository ChatRepository, UpdatesTransport UpdatesTransport) *chatService {
+const prefix = "chat-service"
+
+func NewChatService(chatRepository ChatRepository, UpdatesTransport UpdatesTransport, rdb *redis.Client) *chatService {
 	return &chatService{
 		repo:             chatRepository,
 		updatesTransport: UpdatesTransport,
 		sendCh:           make(chan *entity.Message, 10),
+		rdb:              rdb,
 	}
 }
 
@@ -54,10 +64,38 @@ func (s *chatService) GetMessages(ctx context.Context, userID, projectID string,
 		return nil, err
 	}
 	if !ok {
-		return nil, errorz.ErrForbidden
+		return nil, errorz.Wrap(errorz.ErrForbidden, "chatService.GetMessages")
 	}
-	return s.repo.GetMessages(ctx, userID, projectID, limit, cursor)
 
+	if cursor*limit < 10 {
+		cachedMessages, err := s.GetMessagesFromCache(ctx, projectID, limit, cursor)
+		if err != nil {
+			logger.GetLogger(ctx).Error(ctx, "cache error", zap.Error(err))
+		}
+
+		if len(cachedMessages) > 0 {
+			if len(cachedMessages) < limit {
+				messagesFromDB, dbErr := s.repo.GetMessages(ctx, userID, projectID, limit-len(cachedMessages), cursor+len(cachedMessages))
+				if dbErr != nil {
+					return cachedMessages, dbErr
+				}
+				return append(cachedMessages, messagesFromDB...), nil
+			}
+			return cachedMessages, nil
+		}
+
+		messages, err := s.repo.GetMessages(ctx, userID, projectID, 10, 1)
+		if err != nil {
+			return nil, err
+		}
+		go func() {
+			if err := s.SetMessagesToCache(ctx, projectID, messages, time.Minute); err != nil {
+				logger.GetLogger(ctx).Error(ctx, "failed to set cache", zap.Error(err))
+			}
+		}()
+	}
+
+	return s.repo.GetMessages(ctx, userID, projectID, limit, cursor)
 }
 
 func (s *chatService) CreateChat(ctx context.Context, chat *entity.Chat) (string, error) {
@@ -98,14 +136,79 @@ func (s *chatService) ReadMessage(ch chan *entity.Message) {
 func (s *chatService) WriteMessage(ctx context.Context, msg *entity.Message) {
 	ok, err := s.repo.IsUserInChat(ctx, msg.ProjectID, msg.UserID)
 	if err != nil {
-		log.Printf("error: %v", err)
+		logger.GetLogger(ctx).Error(ctx, "failed to get user in chat", zap.Error(err))
 	}
 	if !ok {
 		return
 	}
 	msg, err = s.repo.WriteMessage(ctx, msg)
 	if err != nil {
-		log.Printf("error: %v", err)
+		logger.GetLogger(ctx).Error(ctx, "failed to write message", zap.Error(err))
+	}
+	err = s.CacheMessage(ctx, msg.ProjectID, msg, time.Minute)
+	if err != nil {
+		logger.GetLogger(ctx).Error(ctx, "failed to set cache", zap.Error(err))
 	}
 	s.sendCh <- msg
+}
+
+func (s *chatService) GetMessagesFromCache(ctx context.Context, projectID string, limit, cursor int) ([]*entity.Message, error) {
+	const op = prefix + ".GetMessagesFromCache"
+	var messages []*entity.Message
+
+	key := fmt.Sprintf("chat:%s:messages", projectID)
+	messagesJSON, err := s.rdb.LRange(ctx, key, int64(cursor*limit), int64(cursor+limit-1)).Result()
+	if err != nil {
+		if err == redis.Nil {
+			return messages, nil
+		}
+		return messages, errorz.WrapInternal(err, op)
+	}
+	for _, messageJSON := range messagesJSON {
+		var message entity.Message
+		if err := json.Unmarshal([]byte(messageJSON), &message); err != nil {
+			return messages, errorz.WrapInternal(err, op)
+		}
+		messages = append(messages, &message)
+	}
+	return messages, nil
+}
+
+func (s *chatService) CacheMessage(ctx context.Context, projectID string, message *entity.Message, ttl time.Duration) error {
+	const op = prefix + ".CacheMessages"
+	key := fmt.Sprintf("chat:%s:messages", projectID)
+	messageJSON, err := json.Marshal(message)
+	if err != nil {
+		return errorz.WrapInternal(err, op)
+	}
+	pipe := s.rdb.TxPipeline()
+	pipe.LPush(ctx, key, messageJSON)
+	pipe.LTrim(ctx, key, 0, 9)
+	pipe.Expire(ctx, key, ttl)
+	_, err = pipe.Exec(ctx)
+	if err != nil {
+		return errorz.WrapInternal(err, op)
+	}
+	return nil
+}
+
+func (s *chatService) SetMessagesToCache(ctx context.Context, projectID string, messages []*entity.Message, ttl time.Duration) error {
+	const op = prefix + ".SetCacheMessages"
+	key := fmt.Sprintf("chat:%s:messages", projectID)
+	pipe := s.rdb.TxPipeline()
+	for _, message := range messages {
+		messageJSON, err := json.Marshal(message)
+		if err != nil {
+			return errorz.WrapInternal(err, op)
+		}
+		pipe.LPush(ctx, key, messageJSON)
+	}
+	pipe.LTrim(ctx, key, 0, 9)
+	pipe.Expire(ctx, key, ttl)
+	_, err := pipe.Exec(ctx)
+	if err != nil {
+		return errorz.WrapInternal(err, op)
+	}
+
+	return nil
 }

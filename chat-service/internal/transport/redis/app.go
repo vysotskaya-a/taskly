@@ -33,8 +33,8 @@ func LoadConfig() Config {
 	return cfg
 }
 
-func New(config Config, rdb *redis.Client, chatService ChatService) *Server {
-	ctx, cancel := context.WithCancel(context.Background())
+func New(config Config, rdb *redis.Client, chatService ChatService, ctx context.Context) *Server {
+	ctx, cancel := context.WithCancel(ctx)
 
 	return &Server{
 		redis:       rdb,

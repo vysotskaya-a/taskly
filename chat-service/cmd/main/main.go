@@ -26,10 +26,10 @@ func main() {
 
 	updatesTransport := redisconsumer.NewUpdatesTransport(rdb)
 	chatRepo := repository.NewChatRepository(&client)
-	chatService := service.NewChatService(chatRepo, updatesTransport)
+	chatService := service.NewChatService(chatRepo, updatesTransport, rdb)
 
 	redisConsumerCfg := redisconsumer.LoadConfig()
-	redisConsumerServer := redisconsumer.New(redisConsumerCfg, rdb, chatService)
+	redisConsumerServer := redisconsumer.New(redisConsumerCfg, rdb, chatService, context)
 
 	grpcServer := grpc.New(grpc.LoadConfig(), chatService, context)
 
