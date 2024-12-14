@@ -89,6 +89,10 @@ func (c *chatRepository) GetMessages(ctx context.Context, userID, projectID stri
 
 func (c *chatRepository) CreateChat(ctx context.Context, chat *entity.Chat) (string, error) {
 	const op = prefix + ".CreateChat"
+	chatExists, err := c.GetChat(ctx, chat.ProjectID)
+	if err == nil && chatExists != nil {
+		return "", errorz.Wrap(errorz.ErrAlreadyExists, op)
+	}
 	chat.CreatedAt = time.Now()
 	result, err := c.db.Collection("chats").InsertOne(ctx, chat)
 	if err != nil {
