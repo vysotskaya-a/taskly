@@ -3,6 +3,8 @@ package app
 import (
 	"context"
 	"fmt"
+	"project-service/internal/kafka"
+	"project-service/internal/kafka/producer"
 	"project-service/internal/repository"
 	"project-service/internal/service"
 
@@ -27,6 +29,9 @@ type serviceProvider struct {
 	pgConfig     config.PGConfig
 	grpcConfig   config.GRPCConfig
 	loggerConfig config.LoggerConfig
+	kafkaConfig  config.KafkaConfig
+
+	producer kafka.Producer
 
 	db                *sqlx.DB
 	projectRepository repository.ProjectRepository
@@ -82,7 +87,16 @@ func (s *serviceProvider) LoggerConfig() config.LoggerConfig {
 	return s.loggerConfig
 }
 
-func (s *serviceProvider) DBClient(ctx context.Context) *sqlx.DB {
+func (s *serviceProvider) KafkaConfig() config.KafkaConfig {
+	if s.kafkaConfig == nil {
+		cfg := config.NewKafkaConfig()
+		s.kafkaConfig = cfg
+	}
+
+	return s.kafkaConfig
+}
+
+func (s *serviceProvider) DBClient(_ context.Context) *sqlx.DB {
 	if s.db == nil {
 		database := db.Init(s.PGConfig().PGConn())
 		closer.Add(database.Close)
@@ -90,6 +104,16 @@ func (s *serviceProvider) DBClient(ctx context.Context) *sqlx.DB {
 	}
 
 	return s.db
+}
+
+func (s *serviceProvider) Producer(_ context.Context) kafka.Producer {
+	if s.producer == nil {
+		p := producer.NewProducer(s.KafkaConfig().Brokers(), s.KafkaConfig().SaramaConfig())
+		closer.Add(p.Close)
+		s.producer = p
+	}
+
+	return s.producer
 }
 
 func (s *serviceProvider) TaskRepository(ctx context.Context) repository.TaskRepository {
