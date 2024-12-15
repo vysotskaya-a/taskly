@@ -20,12 +20,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ProjectService_CreateProject_FullMethodName    = "/project_v1.ProjectService/CreateProject"
-	ProjectService_GetProject_FullMethodName       = "/project_v1.ProjectService/GetProject"
-	ProjectService_ListUserProjects_FullMethodName = "/project_v1.ProjectService/ListUserProjects"
-	ProjectService_UpdateProject_FullMethodName    = "/project_v1.ProjectService/UpdateProject"
-	ProjectService_AddUser_FullMethodName          = "/project_v1.ProjectService/AddUser"
-	ProjectService_DeleteProject_FullMethodName    = "/project_v1.ProjectService/DeleteProject"
+	ProjectService_CreateProject_FullMethodName                   = "/project_v1.ProjectService/CreateProject"
+	ProjectService_GetProject_FullMethodName                      = "/project_v1.ProjectService/GetProject"
+	ProjectService_ListUserProjects_FullMethodName                = "/project_v1.ProjectService/ListUserProjects"
+	ProjectService_UpdateProject_FullMethodName                   = "/project_v1.ProjectService/UpdateProject"
+	ProjectService_AddUser_FullMethodName                         = "/project_v1.ProjectService/AddUser"
+	ProjectService_DeleteProject_FullMethodName                   = "/project_v1.ProjectService/DeleteProject"
+	ProjectService_SubscribeOnProjectNotifications_FullMethodName = "/project_v1.ProjectService/SubscribeOnProjectNotifications"
 )
 
 // ProjectServiceClient is the client API for ProjectService service.
@@ -38,6 +39,7 @@ type ProjectServiceClient interface {
 	UpdateProject(ctx context.Context, in *UpdateProjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	AddUser(ctx context.Context, in *AddUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DeleteProject(ctx context.Context, in *DeleteProjectRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	SubscribeOnProjectNotifications(ctx context.Context, in *SubscribeOnProjectNotificationsRequest, opts ...grpc.CallOption) (*SubscribeOnProjectNotificationsResponse, error)
 }
 
 type projectServiceClient struct {
@@ -108,6 +110,16 @@ func (c *projectServiceClient) DeleteProject(ctx context.Context, in *DeleteProj
 	return out, nil
 }
 
+func (c *projectServiceClient) SubscribeOnProjectNotifications(ctx context.Context, in *SubscribeOnProjectNotificationsRequest, opts ...grpc.CallOption) (*SubscribeOnProjectNotificationsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SubscribeOnProjectNotificationsResponse)
+	err := c.cc.Invoke(ctx, ProjectService_SubscribeOnProjectNotifications_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProjectServiceServer is the server API for ProjectService service.
 // All implementations must embed UnimplementedProjectServiceServer
 // for forward compatibility.
@@ -118,6 +130,7 @@ type ProjectServiceServer interface {
 	UpdateProject(context.Context, *UpdateProjectRequest) (*emptypb.Empty, error)
 	AddUser(context.Context, *AddUserRequest) (*emptypb.Empty, error)
 	DeleteProject(context.Context, *DeleteProjectRequest) (*emptypb.Empty, error)
+	SubscribeOnProjectNotifications(context.Context, *SubscribeOnProjectNotificationsRequest) (*SubscribeOnProjectNotificationsResponse, error)
 	mustEmbedUnimplementedProjectServiceServer()
 }
 
@@ -145,6 +158,9 @@ func (UnimplementedProjectServiceServer) AddUser(context.Context, *AddUserReques
 }
 func (UnimplementedProjectServiceServer) DeleteProject(context.Context, *DeleteProjectRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteProject not implemented")
+}
+func (UnimplementedProjectServiceServer) SubscribeOnProjectNotifications(context.Context, *SubscribeOnProjectNotificationsRequest) (*SubscribeOnProjectNotificationsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SubscribeOnProjectNotifications not implemented")
 }
 func (UnimplementedProjectServiceServer) mustEmbedUnimplementedProjectServiceServer() {}
 func (UnimplementedProjectServiceServer) testEmbeddedByValue()                        {}
@@ -275,6 +291,24 @@ func _ProjectService_DeleteProject_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProjectService_SubscribeOnProjectNotifications_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SubscribeOnProjectNotificationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).SubscribeOnProjectNotifications(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectService_SubscribeOnProjectNotifications_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).SubscribeOnProjectNotifications(ctx, req.(*SubscribeOnProjectNotificationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProjectService_ServiceDesc is the grpc.ServiceDesc for ProjectService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -305,6 +339,10 @@ var ProjectService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteProject",
 			Handler:    _ProjectService_DeleteProject_Handler,
+		},
+		{
+			MethodName: "SubscribeOnProjectNotifications",
+			Handler:    _ProjectService_SubscribeOnProjectNotifications_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

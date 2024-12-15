@@ -15,12 +15,13 @@ import (
 const (
 	projectsTableName = "projects"
 
-	projectsIDColumn          = "id"
-	projectsTitleColumn       = "title"
-	projectsDescriptionColumn = "description"
-	projectsUsersColumn       = "users"
-	projectsAdminIDColumn     = "admin_id"
-	projectsCreatedAtColumn   = "created_at"
+	projectsIDColumn                           = "id"
+	projectsTitleColumn                        = "title"
+	projectsDescriptionColumn                  = "description"
+	projectsUsersColumn                        = "users"
+	projectsAdminIDColumn                      = "admin_id"
+	projectsNotificationSubscribersTGIDSColumn = "notification_subscribers_tg_ids"
+	projectsCreatedAtColumn                    = "created_at"
 )
 
 type ProjectRepository struct {
@@ -35,8 +36,8 @@ func (r *ProjectRepository) Create(ctx context.Context, project *models.Project)
 	const op = "Postgres.ProjectRepository.Create"
 
 	builder := sq.Insert(projectsTableName).
-		Columns(projectsTitleColumn, projectsDescriptionColumn, projectsUsersColumn, projectsAdminIDColumn).
-		Values(project.Title, project.Description, project.Users, project.AdminID).
+		Columns(projectsTitleColumn, projectsDescriptionColumn, projectsUsersColumn, projectsAdminIDColumn, projectsNotificationSubscribersTGIDSColumn).
+		Values(project.Title, project.Description, project.Users, project.AdminID, project.NotificationSubscribersTGIDS).
 		Suffix("RETURNING id").
 		PlaceholderFormat(sq.Dollar)
 
@@ -56,7 +57,7 @@ func (r *ProjectRepository) Create(ctx context.Context, project *models.Project)
 func (r *ProjectRepository) GetByID(ctx context.Context, id string) (*models.Project, error) {
 	const op = "Postgres.ProjectRepository.GetByID"
 
-	builder := sq.Select(projectsIDColumn, projectsTitleColumn, projectsDescriptionColumn, projectsUsersColumn, projectsAdminIDColumn, projectsCreatedAtColumn).
+	builder := sq.Select(projectsIDColumn, projectsTitleColumn, projectsDescriptionColumn, projectsUsersColumn, projectsAdminIDColumn, projectsNotificationSubscribersTGIDSColumn, projectsCreatedAtColumn).
 		From(projectsTableName).
 		Where(sq.Eq{projectsIDColumn: id}).
 		PlaceholderFormat(sq.Dollar).
@@ -82,7 +83,7 @@ func (r *ProjectRepository) GetByID(ctx context.Context, id string) (*models.Pro
 func (r *ProjectRepository) GetAllByUserID(ctx context.Context, userID string) ([]*models.Project, error) {
 	const op = "Postgres.ProjectRepository.GetAllByUserID"
 
-	builder := sq.Select(projectsIDColumn, projectsTitleColumn, projectsDescriptionColumn, projectsUsersColumn, projectsAdminIDColumn, projectsCreatedAtColumn).
+	builder := sq.Select(projectsIDColumn, projectsTitleColumn, projectsDescriptionColumn, projectsUsersColumn, projectsAdminIDColumn, projectsNotificationSubscribersTGIDSColumn, projectsCreatedAtColumn).
 		From(projectsTableName).
 		Where(sq.Expr("? = ANY(user_ids)", userID)).
 		PlaceholderFormat(sq.Dollar)
@@ -105,11 +106,12 @@ func (r *ProjectRepository) Update(ctx context.Context, project *models.Project)
 	const op = "Postgres.ProjectRepository.Update"
 
 	builder := sq.Update(projectsTableName).
-		Set("title", project.Title).
-		Set("description", project.Description).
-		Set("users", project.Users).
-		Set("admin_id", project.AdminID).
-		Where(sq.Eq{"id": project.ID}).
+		Set(projectsTitleColumn, project.Title).
+		Set(projectsDescriptionColumn, project.Description).
+		Set(projectsUsersColumn, project.Users).
+		Set(projectsAdminIDColumn, project.AdminID).
+		Set(projectsNotificationSubscribersTGIDSColumn, project.NotificationSubscribersTGIDS).
+		Where(sq.Eq{projectsIDColumn: project.ID}).
 		PlaceholderFormat(sq.Dollar)
 
 	query, args, err := builder.ToSql()
