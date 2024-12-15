@@ -16,10 +16,11 @@ func (s *Server) CreateProject(ctx context.Context, req *pb.CreateProjectRequest
 	}
 
 	project := &models.Project{
-		Title:       req.GetTitle(),
-		Description: req.GetDescription(),
-		Users:       []string{userID},
-		AdminID:     userID,
+		Title:                        req.GetTitle(),
+		Description:                  req.GetDescription(),
+		Users:                        []string{userID},
+		AdminID:                      userID,
+		NotificationSubscribersTGIDS: make([]int64, 0),
 	}
 
 	projectID, err := s.projectService.Create(ctx, project)

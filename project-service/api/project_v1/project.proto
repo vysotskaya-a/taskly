@@ -14,6 +14,7 @@ service ProjectService {
   rpc UpdateProject(UpdateProjectRequest) returns (google.protobuf.Empty) {}
   rpc AddUser(AddUserRequest) returns (google.protobuf.Empty) {}
   rpc DeleteProject(DeleteProjectRequest) returns (google.protobuf.Empty) {}
+  rpc SubscribeOnProjectNotifications(SubscribeOnProjectNotificationsRequest) returns (SubscribeOnProjectNotificationsResponse) {}
 }
 
 message Project {
@@ -61,4 +62,13 @@ message AddUserRequest {
 
 message DeleteProjectRequest {
   string id = 1;
+}
+
+message SubscribeOnProjectNotificationsRequest {
+  string projectID = 1;
+  int64 telegramID = 2;
+}
+
+message SubscribeOnProjectNotificationsResponse {
+  string msg = 1;
 }

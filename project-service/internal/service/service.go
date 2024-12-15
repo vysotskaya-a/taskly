@@ -14,6 +14,7 @@ type ProjectService interface {
 	Update(ctx context.Context, req *projectpb.UpdateProjectRequest) error
 	AddUser(ctx context.Context, newUserID, projectID string) error
 	Delete(ctx context.Context, id string) error
+	SubscribeOnNotifications(ctx context.Context, projectID string, telegramID int64) error
 }
 
 type TaskService interface {

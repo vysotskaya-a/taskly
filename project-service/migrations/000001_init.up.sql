@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS projects (
     description TEXT NOT NULL,
     users UUID[] NOT NULL,
     admin_id UUID NOT NULL,
+    notification_subscribers_tg_ids INT[] NOT NULL,
     created_at timestamptz NOT NULL DEFAULT now()
 );
 
