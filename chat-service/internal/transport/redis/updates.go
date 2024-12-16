@@ -3,7 +3,6 @@ package redisconsumer
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -36,7 +35,6 @@ func (t *updatesTransport) AddUserToChat(ctx context.Context, userID string, pro
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(data))
 	return t.redis.Publish(ctx, updatesChannel, data).Err()
 }
 

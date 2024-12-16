@@ -9,6 +9,9 @@ import (
 	"chat-service/pkg/mongodb"
 	"chat-service/pkg/redis"
 	"context"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
@@ -42,8 +45,19 @@ func main() {
 	eg.Go(func() error {
 		return redisConsumerServer.Run()
 	})
+	go func() {
+		if err := eg.Wait(); err != nil {
+			log.Error(context, "Error occurred", zap.Error(err))
+		}
+	}()
 
-	if err := eg.Wait(); err != nil {
-		log.Error(context, "Error occurred", zap.Error(err))
-	}
+	graceCh := make(chan os.Signal, 1)
+	signal.Notify(graceCh, syscall.SIGINT, syscall.SIGTERM)
+
+	<-graceCh
+
+	redisConsumerServer.Shutdown()
+	grpcServer.Shutdown()
+
+	log.Info(context, "Shutting down")
 }

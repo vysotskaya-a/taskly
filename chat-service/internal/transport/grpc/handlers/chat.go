@@ -1,4 +1,4 @@
-package grpc
+package handlers
 
 import (
 	"chat-service/entity"
@@ -15,6 +15,20 @@ const (
 	prefix = "chat-service-grpc"
 )
 
+type ChatHandler struct {
+	chatService ChatService
+	api.UnsafeChatServiceServer
+}
+
+// mustEmbedUnimplementedChatServiceServer implements chat_v1.ChatServiceServer.
+func (h *ChatHandler) mustEmbedUnimplementedChatServiceServer() {
+	panic("unimplemented")
+}
+
+func NewChatHandler(chatService ChatService) *ChatHandler {
+	return &ChatHandler{chatService: chatService}
+}
+
 type ChatService interface {
 	AddUserToChat(ctx context.Context, userID string, projectID string) error
 	CreateChat(ctx context.Context, chat *entity.Chat) (string, error)
@@ -25,11 +39,11 @@ type ChatService interface {
 	RemoveUserFromChat(ctx context.Context, userID string, projectID string) error
 }
 
-func (s *Server) AddUserToChat(ctx context.Context, req *api.AddUserToChatRequest) (*api.AddUserToChatResponse, error) {
+func (h *ChatHandler) AddUserToChat(ctx context.Context, req *api.AddUserToChatRequest) (*api.AddUserToChatResponse, error) {
 	if req.GetUserId() == "" || req.GetProjectId() == "" {
 		return nil, errorz.BadRequest()
 	}
-	err := s.chatService.AddUserToChat(ctx, req.GetUserId(), req.GetProjectId())
+	err := h.chatService.AddUserToChat(ctx, req.GetUserId(), req.GetProjectId())
 	if err != nil {
 		if err := errorz.Parse(err); err != nil {
 			if err.Is(errorz.ErrNotFound) {
@@ -38,11 +52,13 @@ func (s *Server) AddUserToChat(ctx context.Context, req *api.AddUserToChatReques
 		}
 		return nil, err
 	}
-	logger.GetLogger(ctx).Info(ctx, "User added to chat", zap.String("user_id", req.GetUserId()), zap.String("project_id", req.GetProjectId()))
+	if logger := logger.GetLogger(ctx); logger != nil {
+		logger.Info(ctx, "User added to chat", zap.String("user_id", req.UserId), zap.String("project_id", req.ProjectId))
+	}
 	return &api.AddUserToChatResponse{ProjectId: req.ProjectId}, nil
 }
 
-func (s *Server) CreateChat(ctx context.Context, req *api.CreateChatRequest) (*api.CreateChatResponse, error) {
+func (s *ChatHandler) CreateChat(ctx context.Context, req *api.CreateChatRequest) (*api.CreateChatResponse, error) {
 	if req.GetProjectId() == "" || req.GetName() == "" {
 		return nil, errorz.BadRequest()
 	}
@@ -54,12 +70,14 @@ func (s *Server) CreateChat(ctx context.Context, req *api.CreateChatRequest) (*a
 	if err != nil {
 		return nil, err
 	}
-	logger.GetLogger(ctx).Info(ctx, "Chat created", zap.String("chat_id", chatId), zap.String("project_id", req.ProjectId))
+	if logger := logger.GetLogger(ctx); logger != nil {
+		logger.Info(ctx, "Chat created", zap.String("chat_id", chatId), zap.String("project_id", req.ProjectId))
+	}
 	return &api.CreateChatResponse{ChatId: chatId}, nil
 }
 
-func (s *Server) GetMessages(ctx context.Context, req *api.GetMessagesRequest) (*api.GetMessagesResponse, error) {
-	if req.GetUserId() == "" || req.GetProjectId() == "" || req.GetLimit() == 0 || req.GetCursor() == 0 {
+func (s *ChatHandler) GetMessages(ctx context.Context, req *api.GetMessagesRequest) (*api.GetMessagesResponse, error) {
+	if req.GetUserId() == "" || req.GetProjectId() == "" || req.GetLimit() <= 0 || req.GetCursor() <= 0 {
 		return nil, errorz.BadRequest()
 	}
 	messages, err := s.chatService.GetMessages(ctx, req.GetUserId(), req.GetProjectId(), int(req.Limit), int(req.Cursor))
@@ -86,7 +104,7 @@ func (s *Server) GetMessages(ctx context.Context, req *api.GetMessagesRequest) (
 	return &api.GetMessagesResponse{Messages: result}, nil
 }
 
-func (s *Server) GetChatUsers(ctx context.Context, req *api.GetChatUsersRequest) (*api.GetChatUsersResponse, error) {
+func (s *ChatHandler) GetChatUsers(ctx context.Context, req *api.GetChatUsersRequest) (*api.GetChatUsersResponse, error) {
 	if req.GetProjectId() == "" {
 		return nil, errorz.BadRequest()
 	}
@@ -103,7 +121,7 @@ func (s *Server) GetChatUsers(ctx context.Context, req *api.GetChatUsersRequest)
 
 }
 
-func (s *Server) GetUserChats(ctx context.Context, req *api.GetUserChatsRequest) (*api.GetUserChatsResponse, error) {
+func (s *ChatHandler) GetUserChats(ctx context.Context, req *api.GetUserChatsRequest) (*api.GetUserChatsResponse, error) {
 	if req.GetUserId() == "" {
 		return nil, errorz.BadRequest()
 	}
@@ -119,7 +137,7 @@ func (s *Server) GetUserChats(ctx context.Context, req *api.GetUserChatsRequest)
 	return &api.GetUserChatsResponse{ProjectIds: chats}, nil
 }
 
-func (s *Server) RemoveUserFromChat(ctx context.Context, req *api.RemoveUserFromChatRequest) (*api.RemoveUserFromChatResponse, error) {
+func (s *ChatHandler) RemoveUserFromChat(ctx context.Context, req *api.RemoveUserFromChatRequest) (*api.RemoveUserFromChatResponse, error) {
 	if req.GetUserId() == "" || req.GetProjectId() == "" {
 		return nil, errorz.BadRequest()
 	}
@@ -132,11 +150,13 @@ func (s *Server) RemoveUserFromChat(ctx context.Context, req *api.RemoveUserFrom
 		}
 		return nil, err
 	}
-	logger.GetLogger(ctx).Info(ctx, "User removed from chat", zap.String("user_id", req.UserId), zap.String("project_id", req.ProjectId))
+	if logger := logger.GetLogger(ctx); logger != nil {
+		logger.Info(ctx, "User removed from chat", zap.String("user_id", req.UserId), zap.String("project_id", req.ProjectId))
+	}
 	return &api.RemoveUserFromChatResponse{ProjectId: req.ProjectId}, nil
 }
 
-func (s *Server) GetChat(ctx context.Context, req *api.GetChatRequest) (*api.GetChatResponse, error) {
+func (s *ChatHandler) GetChat(ctx context.Context, req *api.GetChatRequest) (*api.GetChatResponse, error) {
 	if req.GetProjectId() == "" {
 		return nil, errorz.BadRequest()
 	}

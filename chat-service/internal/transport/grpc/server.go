@@ -1,6 +1,7 @@
 package grpc
 
 import (
+	"chat-service/internal/transport/grpc/handlers"
 	api "chat-service/pkg/api/chat_v1"
 	"chat-service/pkg/logger"
 	"context"
@@ -17,7 +18,7 @@ type Server struct {
 	grpcServer  *grpc.Server
 	listener    net.Listener
 	cfg         Config
-	chatService ChatService
+	chatHandler *handlers.ChatHandler
 }
 
 type Config struct {
@@ -33,7 +34,7 @@ func LoadConfig() Config {
 	return cfg
 }
 
-func New(cfg Config, chatService ChatService, ctx context.Context) *Server {
+func New(cfg Config, chatService handlers.ChatService, ctx context.Context) *Server {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.Port))
 	if err != nil {
 		panic(err)
@@ -48,10 +49,10 @@ func New(cfg Config, chatService ChatService, ctx context.Context) *Server {
 		cfg:         cfg,
 		listener:    lis,
 		grpcServer:  grpcServer,
-		chatService: chatService,
+		chatHandler: handlers.NewChatHandler(chatService),
 	}
 	reflection.Register(grpcServer)
-	api.RegisterChatServiceServer(grpcServer, s)
+	api.RegisterChatServiceServer(grpcServer, s.chatHandler)
 	return s
 }
 

@@ -94,7 +94,6 @@ func (s *chatService) GetMessages(ctx context.Context, userID, projectID string,
 			}
 		}()
 	}
-
 	return s.repo.GetMessages(ctx, userID, projectID, limit, cursor)
 }
 

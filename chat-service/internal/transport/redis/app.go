@@ -21,7 +21,7 @@ type Config struct {
 	GroupName    string `env:"GROUP_NAME"`
 	ConsumerName string `env:"CONSUMER_NAME"`
 	PublishChan  string `env:"PUBLISH_CHANNEL"`
-	WorkerCount  int    `env:"WORKER_COUNT" default:"1"`
+	WorkerCount  int    `env:"WORKER_COUNT" default:"10"`
 }
 
 func LoadConfig() Config {

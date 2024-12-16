@@ -55,5 +55,8 @@ func ContextWithLogger(ctx context.Context, logger Logger) context.Context {
 }
 
 func GetLogger(ctx context.Context) Logger {
-	return ctx.Value(LoggerKey).(*ZapLogger)
+	if logger, ok := ctx.Value(LoggerKey).(Logger); ok {
+		return logger
+	}
+	return nil
 }

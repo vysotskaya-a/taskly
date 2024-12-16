@@ -94,6 +94,9 @@ func (c *chatRepository) CreateChat(ctx context.Context, chat *entity.Chat) (str
 		return "", errorz.Wrap(errorz.ErrAlreadyExists, op)
 	}
 	chat.CreatedAt = time.Now()
+	if chat.Members == nil {
+		chat.Members = []string{}
+	}
 	result, err := c.db.Collection("chats").InsertOne(ctx, chat)
 	if err != nil {
 		return "", errorz.WrapInternal(err, op)
@@ -146,7 +149,6 @@ func (c *chatRepository) RemoveUserFromChat(ctx context.Context, userID string, 
 func (c *chatRepository) GetUserChats(ctx context.Context, userID string) ([]string, error) {
 	const op = prefix + ".GetUserChats"
 	var result []string
-	println(userID)
 	cur, err := c.db.Collection("chats").Find(ctx, bson.M{"members": userID})
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
