@@ -3,18 +3,19 @@ package service
 import (
 	"context"
 	"user-service/internal/models"
-	pb "user-service/pkg/api/auth_v1"
+	authpb "user-service/pkg/api/auth_v1"
+	userpb "user-service/pkg/api/user_v1"
 )
 
 type UserService interface {
 	Register(ctx context.Context, user *models.User) (string, error)
-	GetUserByID(ctx context.Context, id string) (*models.User, error)
-	UpdateUser(ctx context.Context, user *models.User) error
-	DeleteUser(ctx context.Context, id string) error
+	GetByID(ctx context.Context, id string) (*models.User, error)
+	Update(ctx context.Context, req *userpb.UpdateUserRequest) error
+	Delete(ctx context.Context, id string) error
 }
 
 type AuthService interface {
-	Login(ctx context.Context, req *pb.LoginRequest) (string, error)
+	Login(ctx context.Context, req *authpb.LoginRequest) (string, error)
 	GetRefreshToken(ctx context.Context, refreshToken string) (string, error)
 	GetAccessToken(ctx context.Context, refreshToken string) (string, error)
 }

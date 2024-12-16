@@ -19,9 +19,10 @@ import (
 )
 
 type serviceProvider struct {
-	pgConfig   config.PGConfig
-	grpcConfig config.GRPCConfig
-	jwtConfig  config.JWTConfig
+	pgConfig     config.PGConfig
+	grpcConfig   config.GRPCConfig
+	jwtConfig    config.JWTConfig
+	loggerConfig config.LoggerConfig
 
 	db             *sqlx.DB
 	userRepository repository.UserRepository
@@ -41,7 +42,7 @@ func (s *serviceProvider) PGConfig() config.PGConfig {
 	if s.pgConfig == nil {
 		cfg, err := config.NewPGConfig()
 		if err != nil {
-			panic(fmt.Errorf("failed to get pg config: %s", err.Error()))
+			panic(fmt.Errorf("failed to get pg config: %w", err))
 		}
 
 		s.pgConfig = cfg
@@ -54,13 +55,39 @@ func (s *serviceProvider) GRPCConfig() config.GRPCConfig {
 	if s.grpcConfig == nil {
 		cfg, err := config.NewGRPCConfig()
 		if err != nil {
-			panic(fmt.Errorf("failed to get grpc config: %s", err.Error()))
+			panic(fmt.Errorf("failed to get grpc config: %w", err))
 		}
 
 		s.grpcConfig = cfg
 	}
 
 	return s.grpcConfig
+}
+
+func (s *serviceProvider) JWTConfig() config.JWTConfig {
+	if s.jwtConfig == nil {
+		cfg, err := config.NewJWTConfig()
+		if err != nil {
+			panic(fmt.Errorf("failed to get jwt config: %w", err))
+		}
+
+		s.jwtConfig = cfg
+	}
+
+	return s.jwtConfig
+}
+
+func (s *serviceProvider) LoggerConfig() config.LoggerConfig {
+	if s.loggerConfig == nil {
+		cfg, err := config.NewLoggerConfig()
+		if err != nil {
+			panic(fmt.Errorf("failed to get logger config: %w", err))
+		}
+
+		s.loggerConfig = cfg
+	}
+
+	return s.loggerConfig
 }
 
 func (s *serviceProvider) DBClient(ctx context.Context) *sqlx.DB {
@@ -99,7 +126,7 @@ func (s *serviceProvider) UserServer(ctx context.Context) *userServer.Server {
 
 func (s *serviceProvider) AuthService(ctx context.Context) service.AuthService {
 	if s.authService == nil {
-		s.authService = authService.NewService(s.UserRepository(ctx))
+		s.authService = authService.NewService(s.UserRepository(ctx), s.JWTConfig())
 	}
 
 	return s.authService
@@ -112,3 +139,9 @@ func (s *serviceProvider) AuthServer(ctx context.Context) *authServer.Server {
 
 	return s.authServer
 }
+
+// не совсем понял зачем нужны эти функции поясните плиз
+
+// это DI контейнер. Все инициализации происходят здесь(к примеру, чтобы инициализировать UserRepository в конструктор
+// к нему передастся функция s.DBClient(ctx), которая в свою очередь либо вернёт уже инициализированную бд, либо
+// инициализирует её и потом вернёт). Можно сказать это упрощённая версия DI контейнера FX от Uber.

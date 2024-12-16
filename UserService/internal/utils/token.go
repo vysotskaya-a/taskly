@@ -1,10 +1,10 @@
 package utils
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/pkg/errors"
 
 	"user-service/internal/models"
 )
@@ -29,19 +29,19 @@ func VerifyToken(tokenStr string, secretKey []byte) (*models.UserClaims, error) 
 		func(token *jwt.Token) (interface{}, error) {
 			_, ok := token.Method.(*jwt.SigningMethodHMAC)
 			if !ok {
-				return nil, errors.Errorf("unexpected token signing method")
+				return nil, fmt.Errorf("unexpected token signing method")
 			}
 
 			return secretKey, nil
 		},
 	)
 	if err != nil {
-		return nil, errors.Errorf("invalid token: %s", err.Error())
+		return nil, fmt.Errorf("invalid token: %s", err.Error())
 	}
 
 	claims, ok := token.Claims.(*models.UserClaims)
 	if !ok {
-		return nil, errors.Errorf("invalid token claims")
+		return nil, fmt.Errorf("invalid token claims")
 	}
 
 	return claims, nil

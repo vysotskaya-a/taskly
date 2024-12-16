@@ -1,6 +1,7 @@
 package closer
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -79,7 +80,7 @@ func (c *Closer) CloseAll() {
 
 		for i := 0; i < cap(errs); i++ {
 			if err := <-errs; err != nil {
-				log.Println("error returned from Closer")
+				log.Println(fmt.Errorf("error returned from Closer: %w", err))
 			}
 		}
 	})
