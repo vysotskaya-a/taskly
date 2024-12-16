@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -11,7 +12,11 @@ import (
 )
 
 func (s *Server) ListUserProjects(ctx context.Context, req *emptypb.Empty) (*pb.ListUserProjectsResponse, error) {
-	userID, ok := ctx.Value("user_id").(string)
+	var userID string
+	md, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		userID = md["user_id"][0]
+	}
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "Authentication required. Please provide a valid token.")
 	}
@@ -25,12 +30,13 @@ func (s *Server) ListUserProjects(ctx context.Context, req *emptypb.Empty) (*pb.
 	response := make([]*pb.Project, len(projects))
 	for i, project := range projects {
 		response[i] = &pb.Project{
-			Id:          project.ID,
-			Title:       project.Title,
-			Description: project.Description,
-			Users:       project.Users,
-			AdminId:     project.AdminID,
-			CreatedAt:   timestamppb.New(project.CreatedAt),
+			Id:                           project.ID,
+			Title:                        project.Title,
+			Description:                  project.Description,
+			Users:                        project.Users,
+			AdminId:                      project.AdminID,
+			NotificationSubscribersTgIds: project.NotificationSubscribersTGIDS,
+			CreatedAt:                    timestamppb.New(project.CreatedAt),
 		}
 	}
 

@@ -2,28 +2,34 @@ package task
 
 import (
 	"context"
+	"google.golang.org/grpc/metadata"
 	"project-service/internal/errorz"
+	"project-service/internal/models"
 )
 
-func (s *Service) Delete(ctx context.Context, id string) error {
-	userID, ok := ctx.Value("user_id").(string)
+func (s *Service) Delete(ctx context.Context, id string) (*models.Project, error) {
+	var userID string
+	md, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		userID = md["user_id"][0]
+	}
 	if !ok {
-		return errorz.ErrUserIDNotSet
+		return nil, errorz.ErrUserIDNotSet
 	}
 
 	task, err := s.taskRepository.GetByID(ctx, id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	project, err := s.projectRepository.GetByID(ctx, task.ProjectId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if userID != project.AdminID {
-		return errorz.ErrTaskAccessForbidden
+		return nil, errorz.ErrTaskAccessForbidden
 	}
 
-	return s.taskRepository.Delete(ctx, id)
+	return project, s.taskRepository.Delete(ctx, id)
 }

@@ -9,10 +9,10 @@ import (
 )
 
 func (s *Service) Register(ctx context.Context, user *models.User) (string, error) {
-	user, err := s.userRepository.GetByEmail(ctx, user.Email)
+	dbUser, err := s.userRepository.GetByEmail(ctx, user.Email)
 	switch {
 	case err == nil:
-		return user.ID, nil
+		return dbUser.ID, nil
 
 	case !errors.Is(err, errorz.ErrUserNotFound):
 		return "", err

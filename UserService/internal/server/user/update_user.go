@@ -15,7 +15,7 @@ func (s *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*em
 	err := s.userService.Update(ctx, req)
 	switch {
 	case errors.Is(err, errorz.ErrUserIDNotSet):
-		return nil, status.Error(codes.InvalidArgument, "User id not set.")
+		return nil, status.Error(codes.Unauthenticated, "User id not set.")
 	case errors.Is(err, errorz.ErrUserAccessDenied):
 		return nil, status.Error(codes.PermissionDenied, "Permission denied.")
 	case errors.Is(err, errorz.ErrUserNotFound):

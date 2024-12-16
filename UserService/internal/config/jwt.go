@@ -51,12 +51,12 @@ func NewJWTConfig() (JWTConfig, error) {
 	}
 
 	accessTokenSecret := os.Getenv(accessTokenSecretEnvName)
-	if len(refreshTokenSecret) == 0 {
+	if len(accessTokenSecret) == 0 {
 		return nil, errAccessTokenSecretNotFound
 	}
 
 	accessTokenExpirationStr := os.Getenv(accessTokenExpirationEnvName)
-	if len(refreshTokenSecret) == 0 {
+	if len(accessTokenExpirationStr) == 0 {
 		return nil, errAccessTokenExpirationNotFound
 
 	}

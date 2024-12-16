@@ -18,9 +18,9 @@ type ProjectService interface {
 }
 
 type TaskService interface {
-	Create(ctx context.Context, task *models.Task) (string, error)
+	Create(ctx context.Context, task *models.Task) (*models.Project, string, error)
 	GetByID(ctx context.Context, id string) (*models.Task, error)
 	GetAllByProjectID(ctx context.Context, projectID string) ([]*models.Task, error)
-	Update(ctx context.Context, req *taskpb.UpdateTaskRequest) error
-	Delete(ctx context.Context, id string) error
+	Update(ctx context.Context, req *taskpb.UpdateTaskRequest) (*models.Project, error)
+	Delete(ctx context.Context, id string) (*models.Project, error)
 }

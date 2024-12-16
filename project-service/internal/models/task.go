@@ -36,3 +36,9 @@ func (s TaskStatus) Validate() error {
 		return errorz.ErrInvalidTaskStatus
 	}
 }
+
+const (
+	CreateTaskMsg = "%d:-:В проекте %s создали новое задание %s!"
+	UpdateTaskMsg = "%d:-:В проекте %s обновили задание!"
+	DeleteTaskMsg = "%d:-:В проекте %s удалили задание!"
+)

@@ -68,7 +68,7 @@ func (r *ProjectRepository) GetByID(ctx context.Context, id string) (*models.Pro
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	var project models.Project
+	var project models.RepoProject
 	err = r.db.GetContext(ctx, &project, query, args...)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -77,7 +77,7 @@ func (r *ProjectRepository) GetByID(ctx context.Context, id string) (*models.Pro
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return &project, nil
+	return models.FromRepoToService(&project), nil
 }
 
 func (r *ProjectRepository) GetAllByUserID(ctx context.Context, userID string) ([]*models.Project, error) {
@@ -85,7 +85,7 @@ func (r *ProjectRepository) GetAllByUserID(ctx context.Context, userID string) (
 
 	builder := sq.Select(projectsIDColumn, projectsTitleColumn, projectsDescriptionColumn, projectsUsersColumn, projectsAdminIDColumn, projectsNotificationSubscribersTGIDSColumn, projectsCreatedAtColumn).
 		From(projectsTableName).
-		Where(sq.Expr("? = ANY(user_ids)", userID)).
+		Where(sq.Expr("? = ANY(users)", userID)).
 		PlaceholderFormat(sq.Dollar)
 
 	query, args, err := builder.ToSql()
@@ -93,10 +93,15 @@ func (r *ProjectRepository) GetAllByUserID(ctx context.Context, userID string) (
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	var projects []*models.Project
-	err = r.db.SelectContext(ctx, &projects, query, args...)
+	var repoProjects []*models.RepoProject
+	err = r.db.SelectContext(ctx, &repoProjects, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	projects := make([]*models.Project, len(repoProjects))
+	for i, repoProject := range repoProjects {
+		projects[i] = models.FromRepoToService(repoProject)
 	}
 
 	return projects, nil
@@ -138,7 +143,7 @@ func (r *ProjectRepository) Update(ctx context.Context, project *models.Project)
 func (r *ProjectRepository) Delete(ctx context.Context, id string) error {
 	const op = "Postgres.ProjectRepository.Delete"
 
-	builder := sq.Delete(projectsIDColumn).
+	builder := sq.Delete(projectsTableName).
 		Where(sq.Eq{projectsIDColumn: id}).
 		PlaceholderFormat(sq.Dollar)
 
