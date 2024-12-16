@@ -5,11 +5,13 @@ go 1.23.3
 require (
 	github.com/IBM/sarama v1.43.3
 	github.com/Masterminds/squirrel v1.5.4
+	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	github.com/rs/zerolog v1.33.0
+	github.com/sony/gobreaker v1.0.0
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/grpc v1.68.1
 	google.golang.org/protobuf v1.34.2

@@ -3,13 +3,18 @@ package app
 import (
 	"context"
 	"fmt"
+	grpcMiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/rs/zerolog/log"
+	"github.com/sony/gobreaker"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 	"net"
+
+	"time"
 	"user-service/internal/closer"
 	"user-service/internal/config"
+	"user-service/internal/server/interceptor"
 	authpb "user-service/pkg/api/auth_v1"
 	userpb "user-service/pkg/api/user_v1"
 	"user-service/pkg/zlog"
@@ -73,7 +78,27 @@ func (a *App) initServiceProvider(_ context.Context) error {
 }
 
 func (a *App) initGRPCServer(ctx context.Context) error {
-	a.grpcServer = grpc.NewServer(grpc.Creds(insecure.NewCredentials()))
+	cb := gobreaker.NewCircuitBreaker(gobreaker.Settings{
+		Name:        "user-service",
+		MaxRequests: 3,
+		Timeout:     5 * time.Second,
+		ReadyToTrip: func(counts gobreaker.Counts) bool {
+			failureRatio := float64(counts.TotalFailures) / float64(counts.Requests)
+			return failureRatio >= 0.6
+		},
+		OnStateChange: func(name string, from gobreaker.State, to gobreaker.State) {
+			log.Info().Msgf("Circuit Breaker: %s, changed from %v, to %v\n", name, from, to)
+		},
+	})
+
+	a.grpcServer = grpc.NewServer(
+		grpc.Creds(insecure.NewCredentials()),
+		grpc.UnaryInterceptor(
+			grpcMiddleware.ChainUnaryServer(
+				interceptor.NewCircuitBreakerInterceptor(cb).Unary,
+			),
+		),
+	)
 
 	reflection.Register(a.grpcServer)
 
