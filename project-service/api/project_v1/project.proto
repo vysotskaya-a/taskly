@@ -23,7 +23,8 @@ message Project {
   string description = 3;
   repeated string users = 4;
   string admin_id = 5;
-  google.protobuf.Timestamp created_at = 6;
+  repeated int64 notification_subscribers_tg_ids = 6;
+  google.protobuf.Timestamp created_at = 7;
 }
 
 message CreateProjectRequest {

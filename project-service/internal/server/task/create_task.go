@@ -3,6 +3,7 @@ package task
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -21,7 +22,7 @@ func (s *Server) CreateTask(ctx context.Context, req *pb.CreateTaskRequest) (*pb
 		Deadline:    req.Deadline.AsTime(),
 	}
 
-	taskID, err := s.taskService.Create(ctx, task)
+	project, taskID, err := s.taskService.Create(ctx, task)
 	switch {
 	case errors.Is(err, errorz.ErrUserIDNotSet):
 		return nil, status.Error(codes.Unauthenticated, "Authentication required. Please provide a valid token.")
@@ -35,6 +36,13 @@ func (s *Server) CreateTask(ctx context.Context, req *pb.CreateTaskRequest) (*pb
 	case err != nil:
 		log.Error().Err(err).Msg("error while creating task")
 		return nil, status.Errorf(codes.Internal, "Failed to create task.")
+	}
+
+	for _, tgSubID := range project.NotificationSubscribersTGIDS {
+		msg := fmt.Sprintf(models.CreateTaskMsg, tgSubID, project.Title, taskID)
+		if err = s.producer.SendMessage(s.kafkaConfig.Topic(), msg); err != nil {
+			log.Error().Err(err).Msg("Failed to send message to Kafka topic")
+		}
 	}
 
 	return &pb.CreateTaskResponse{Id: taskID}, nil

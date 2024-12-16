@@ -30,12 +30,13 @@ func (s *Server) GetProject(ctx context.Context, req *pb.GetProjectRequest) (*pb
 
 	return &pb.GetProjectResponse{
 		Project: &pb.Project{
-			Id:          project.ID,
-			Title:       project.Title,
-			Description: project.Description,
-			Users:       project.Users,
-			AdminId:     project.AdminID,
-			CreatedAt:   timestamppb.New(project.CreatedAt),
+			Id:                           project.ID,
+			Title:                        project.Title,
+			Description:                  project.Description,
+			Users:                        project.Users,
+			AdminId:                      project.AdminID,
+			NotificationSubscribersTgIds: project.NotificationSubscribersTGIDS,
+			CreatedAt:                    timestamppb.New(project.CreatedAt),
 		},
 	}, nil
 }

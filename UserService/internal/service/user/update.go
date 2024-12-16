@@ -3,13 +3,18 @@ package user
 import (
 	"context"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/grpc/metadata"
 	"user-service/internal/errorz"
 	"user-service/internal/models"
 	pb "user-service/pkg/api/user_v1"
 )
 
 func (s *Service) Update(ctx context.Context, req *pb.UpdateUserRequest) error {
-	userID, ok := ctx.Value("user_id").(string)
+	var userID string
+	md, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		userID = md["user_id"][0]
+	}
 	if !ok {
 		return errorz.ErrUserIDNotSet
 	}

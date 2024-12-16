@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     description TEXT,
     status TEXT NOT NULL,
     project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    executor_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    executor_id UUID NOT NULL,
     deadline timestamptz,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now()

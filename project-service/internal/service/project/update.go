@@ -2,13 +2,18 @@ package project
 
 import (
 	"context"
+	"google.golang.org/grpc/metadata"
 	"project-service/internal/errorz"
 	"project-service/internal/models"
 	pb "project-service/pkg/api/project_v1"
 )
 
 func (s *Service) Update(ctx context.Context, req *pb.UpdateProjectRequest) error {
-	userID, ok := ctx.Value("user_id").(string)
+	var userID string
+	md, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		userID = md["user_id"][0]
+	}
 	if !ok {
 		return errorz.ErrUserIDNotSet
 	}

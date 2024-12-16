@@ -2,11 +2,16 @@ package project
 
 import (
 	"context"
+	"google.golang.org/grpc/metadata"
 	"project-service/internal/errorz"
 )
 
 func (s *Service) SubscribeOnNotifications(ctx context.Context, projectID string, telegramID int64) error {
-	userID, ok := ctx.Value("user_id").(string)
+	var userID string
+	md, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		userID = md["user_id"][0]
+	}
 	if !ok {
 		return errorz.ErrUserIDNotSet
 	}

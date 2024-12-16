@@ -149,7 +149,7 @@ func (s *serviceProvider) ProjectService(ctx context.Context) service.ProjectSer
 
 func (s *serviceProvider) TaskServer(ctx context.Context) *taskServer.Server {
 	if s.taskServer == nil {
-		s.taskServer = taskServer.NewServer(s.TaskService(ctx))
+		s.taskServer = taskServer.NewServer(s.TaskService(ctx), s.Producer(ctx), s.KafkaConfig())
 	}
 
 	return s.taskServer

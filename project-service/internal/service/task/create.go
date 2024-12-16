@@ -2,26 +2,33 @@ package task
 
 import (
 	"context"
+	"google.golang.org/grpc/metadata"
 	"project-service/internal/errorz"
 	"project-service/internal/models"
 )
 
-func (s *Service) Create(ctx context.Context, task *models.Task) (string, error) {
-	userID, ok := ctx.Value("user_id").(string)
+func (s *Service) Create(ctx context.Context, task *models.Task) (*models.Project, string, error) {
+	var userID string
+	md, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		userID = md["user_id"][0]
+	}
 	if !ok {
-		return "", errorz.ErrUserIDNotSet
+		return nil, "", errorz.ErrUserIDNotSet
 	}
 
 	project, err := s.projectRepository.GetByID(ctx, task.ProjectId)
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
 
 	for _, pUserID := range project.Users {
 		if userID == pUserID {
-			return s.taskRepository.Create(ctx, task)
+			var taskID string
+			taskID, err = s.taskRepository.Create(ctx, task)
+			return project, taskID, err
 		}
 	}
 
-	return "", errorz.ErrTaskAccessForbidden
+	return nil, "", errorz.ErrTaskAccessForbidden
 }

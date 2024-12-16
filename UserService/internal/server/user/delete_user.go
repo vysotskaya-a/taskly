@@ -16,7 +16,7 @@ func (s *Server) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*em
 	err := s.userService.Delete(ctx, req.GetId())
 	switch {
 	case errors.Is(err, errorz.ErrUserIDNotSet):
-		return nil, status.Error(codes.InvalidArgument, "User id not set.")
+		return nil, status.Error(codes.Unauthenticated, "User id not set.")
 	case errors.Is(err, errorz.ErrUserAccessDenied):
 		return nil, status.Error(codes.PermissionDenied, "Permission denied.")
 	case errors.Is(err, errorz.ErrUserNotFound):
