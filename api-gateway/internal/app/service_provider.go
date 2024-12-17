@@ -221,7 +221,7 @@ func (s *serviceProvider) AuthHandler() *auth.Handler {
 
 func (s *serviceProvider) ProjectHandler() *project.Handler {
 	if s.projectHandler == nil {
-		s.projectHandler = project.NewHandler(s.ProjectAPIClient())
+		s.projectHandler = project.NewHandler(s.ProjectAPIClient(), s.ChatAPIClient())
 	}
 	return s.projectHandler
 }

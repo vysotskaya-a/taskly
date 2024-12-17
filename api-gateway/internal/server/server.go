@@ -72,6 +72,7 @@ func addRoutes(
 
 		r.With(authHandler.Auth).Route("/chats", func(r chi.Router) {
 			r.Get("/{project_id}/messages", helper.MakeHandler(chatHandler.GetMessages))
+			r.Get("/", helper.MakeHandler(chatHandler.GetChats))
 		})
 	})
 }

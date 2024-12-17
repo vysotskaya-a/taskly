@@ -5,12 +5,14 @@ import (
 	"api-gateway/internal/models/request"
 	"api-gateway/internal/models/response"
 	"api-gateway/internal/server/helper"
+	chatpb "api-gateway/pkg/api/chat_v1"
 	projectpb "api-gateway/pkg/api/project_v1"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"net/http"
 )
 
 func (h *Handler) CreateProject(w http.ResponseWriter, r *http.Request) error {
@@ -49,6 +51,11 @@ func (h *Handler) CreateProject(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	_, err = h.chatApiClient.CreateChat(ctx, &chatpb.CreateChatRequest{
+		ProjectId: createProjectResp.GetId(),
+		Name:      createProjectRequest.Title,
+		Member:    createProjectRequest.Users,
+	})
 	resp := response.CreateProject{
 		ID: createProjectResp.GetId(),
 	}

@@ -5,13 +5,15 @@ import (
 	"api-gateway/internal/models/request"
 	"api-gateway/internal/models/response"
 	"api-gateway/internal/server/helper"
+	chatpb "api-gateway/pkg/api/chat_v1"
 	projectpb "api-gateway/pkg/api/project_v1"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"net/http"
 )
 
 func (h *Handler) AddUser(w http.ResponseWriter, r *http.Request) error {
@@ -68,6 +70,18 @@ func (h *Handler) AddUser(w http.ResponseWriter, r *http.Request) error {
 				Err:    err,
 				Msg:    "failed to add user to project",
 			}
+		}
+	}
+
+	_, err = h.chatApiClient.AddUserToChat(ctx, &chatpb.AddUserToChatRequest{
+		ProjectId: projectID,
+		UserId:    addUserRequest.UserID,
+	})
+	if err != nil {
+		return errorz.APIError{
+			Status: http.StatusInternalServerError,
+			Err:    err,
+			Msg:    "failed to add user to project chat",
 		}
 	}
 
