@@ -11,6 +11,8 @@ var (
 	errGRPCUserServerPortNotFound    = errors.New("grpc user server port not found")
 	errGRPCProjectServerHostNotFound = errors.New("grpc project server host not found")
 	errGRPCProjectServerPortNotFound = errors.New("grpc project server port not found")
+	errGRPCChatServerHostNotFound    = errors.New("grpc chat server host not found")
+	errGRPCChatServerPortNotFound    = errors.New("grpc chat server port not found")
 )
 
 const (
@@ -18,11 +20,14 @@ const (
 	grpcUserServerPortEnvName    = "GRPC_USER_SERVER_PORT"
 	grpcProjectServerHostEnvName = "GRPC_PROJECT_SERVER_HOST"
 	grpcProjectServerPortEnvName = "GRPC_PROJECT_SERVER_PORT"
+	grpcChatServerHostEnvName    = "GRPC_CHAT_SERVER_HOST"
+	grpcChatServerPortEnvName    = "GRPC_CHAT_SERVER_PORT"
 )
 
 type GRPCConfig interface {
 	UserServerAddress() string
 	ProjectServerAddress() string
+	ChatServerAddress() string
 }
 
 type grpcConfig struct {
@@ -30,6 +35,8 @@ type grpcConfig struct {
 	userServerPort    string
 	projectServerHost string
 	projectServerPort string
+	chatServerHost    string
+	chatServerPort    string
 }
 
 func NewGRPCConfig() (GRPCConfig, error) {
@@ -53,11 +60,23 @@ func NewGRPCConfig() (GRPCConfig, error) {
 		return nil, errGRPCProjectServerPortNotFound
 	}
 
+	chatServerHost := os.Getenv(grpcChatServerHostEnvName)
+	if len(chatServerHost) == 0 {
+		return nil, errGRPCChatServerHostNotFound
+	}
+
+	chatServerPort := os.Getenv(grpcChatServerPortEnvName)
+	if len(chatServerPort) == 0 {
+		return nil, errGRPCChatServerPortNotFound
+	}
+
 	return &grpcConfig{
 		userServerHost:    userServerHost,
 		userServerPort:    userServerPort,
 		projectServerHost: projectServerHost,
 		projectServerPort: projectServerPort,
+		chatServerHost:    chatServerHost,
+		chatServerPort:    chatServerPort,
 	}, nil
 }
 
@@ -67,4 +86,8 @@ func (cfg *grpcConfig) UserServerAddress() string {
 
 func (cfg *grpcConfig) ProjectServerAddress() string {
 	return net.JoinHostPort(cfg.projectServerHost, cfg.projectServerPort)
+}
+
+func (cfg *grpcConfig) ChatServerAddress() string {
+	return net.JoinHostPort(cfg.chatServerHost, cfg.chatServerPort)
 }

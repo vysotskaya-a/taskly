@@ -1,7 +1,8 @@
 package redis
 
 import (
-	"github.com/ilyakaznacheev/cleanenv"
+	"api-gateway/internal/config"
+
 	"github.com/redis/go-redis/v9"
 )
 
@@ -11,19 +12,10 @@ type Config struct {
 	DB       int    `env:"REDIS_DB" default:"0"`
 }
 
-func LoadConfig() Config {
-	var cfg Config
-	err := cleanenv.ReadEnv(&cfg)
-	if err != nil {
-		panic(err)
-	}
-	return cfg
-}
-
-func New(config Config) *redis.Client {
+func New(cfg config.RedisConfig) *redis.Client {
 	return redis.NewClient(&redis.Options{
-		Addr:     config.Addr,
-		Password: config.Password,
-		DB:       config.DB,
+		Addr:     cfg.Address(),
+		Password: cfg.Password(),
+		DB:       cfg.Db(),
 	})
 }

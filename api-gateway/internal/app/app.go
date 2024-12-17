@@ -8,9 +8,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"net/http"
 	"os"
+
+	"github.com/rs/zerolog/log"
 )
 
 type App struct {
@@ -79,7 +80,7 @@ func (a *App) initLogger(_ context.Context) error {
 }
 
 func (a *App) initHTTPServer(_ context.Context) error {
-	srv := server.NewServer(a.serviceProvider.UserHandler(), a.serviceProvider.AuthHandler(), a.serviceProvider.ProjectHandler(), a.serviceProvider.TaskHandler())
+	srv := server.NewServer(a.serviceProvider.UserHandler(), a.serviceProvider.AuthHandler(), a.serviceProvider.ProjectHandler(), a.serviceProvider.TaskHandler(), a.serviceProvider.ChatHandler())
 
 	httpServer := &http.Server{
 		Addr:    a.serviceProvider.HTTPConfig().Address(),

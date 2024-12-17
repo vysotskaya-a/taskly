@@ -1,7 +1,7 @@
 package ws
 
 import (
-	"chat/internal/entity"
+	"api-gateway/internal/entity"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -15,7 +15,6 @@ type Client struct {
 	Conn    *websocket.Conn
 	Updates chan interface{}
 	RoomIDs []string `json:"roomIds"`
-	Email   string   `json:"email"`
 }
 
 func (c *Client) WriteUpdates() {

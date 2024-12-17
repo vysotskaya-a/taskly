@@ -1,7 +1,7 @@
 package service
 
 import (
-	"chat/internal/entity"
+	"api-gateway/internal/entity"
 	"context"
 	"encoding/json"
 	"log"

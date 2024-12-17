@@ -2,13 +2,15 @@ package server
 
 import (
 	"api-gateway/internal/server/auth"
+	"api-gateway/internal/server/chat"
 	"api-gateway/internal/server/helper"
 	"api-gateway/internal/server/project"
 	"api-gateway/internal/server/task"
 	"api-gateway/internal/server/user"
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"net/http"
 )
 
 // NewServer инициализирует новый сервер, применяет middleware и устанавливает пути.
@@ -17,12 +19,13 @@ func NewServer(
 	authHandler *auth.Handler,
 	projectHandler *project.Handler,
 	taskHandler *task.Handler,
+	chatHandler *chat.Handler,
 ) http.Handler {
 	router := chi.NewRouter()
 
 	router.Use(middleware.Recoverer)
 
-	addRoutes(router, userHandler, authHandler, projectHandler, taskHandler)
+	addRoutes(router, userHandler, authHandler, projectHandler, taskHandler, chatHandler)
 
 	var handler http.Handler = router
 
@@ -35,6 +38,7 @@ func addRoutes(
 	authHandler *auth.Handler,
 	projectHandler *project.Handler,
 	taskHandler *task.Handler,
+	chatHandler *chat.Handler,
 ) {
 	router.Route("/api", func(r chi.Router) {
 		r.Post("/register", helper.MakeHandler(userHandler.Register))
@@ -64,6 +68,10 @@ func addRoutes(
 				r.Patch("/{task_id}", helper.MakeHandler(taskHandler.UpdateTask))
 				r.Delete("/{task_id}", helper.MakeHandler(taskHandler.DeleteTask))
 			})
+		})
+
+		r.With(authHandler.Auth).Route("/chats", func(r chi.Router) {
+			r.Get("/{project_id}/messages", helper.MakeHandler(chatHandler.GetMessages))
 		})
 	})
 }

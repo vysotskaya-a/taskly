@@ -1,7 +1,7 @@
 package ws
 
 import (
-	"chat/internal/entity"
+	"api-gateway/internal/entity"
 	"context"
 	"fmt"
 )
