@@ -4,11 +4,16 @@ import (
 	"context"
 	"fmt"
 	"github.com/rs/zerolog/log"
+	"github.com/sony/gobreaker"
 	"net"
 	"project-service/internal/closer"
 	"project-service/internal/config"
+	"project-service/internal/server/interceptor"
 	taskpb "project-service/pkg/api/task_v1"
 	"project-service/pkg/zlog"
+	"time"
+
+	grpcMiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 
 	projectpb "project-service/pkg/api/project_v1"
 
@@ -75,7 +80,27 @@ func (a *App) initServiceProvider(_ context.Context) error {
 }
 
 func (a *App) initGRPCServer(ctx context.Context) error {
-	a.grpcServer = grpc.NewServer(grpc.Creds(insecure.NewCredentials()))
+	cb := gobreaker.NewCircuitBreaker(gobreaker.Settings{
+		Name:        "project-service",
+		MaxRequests: 3,
+		Timeout:     5 * time.Second,
+		ReadyToTrip: func(counts gobreaker.Counts) bool {
+			failureRatio := float64(counts.TotalFailures) / float64(counts.Requests)
+			return failureRatio >= 0.6
+		},
+		OnStateChange: func(name string, from gobreaker.State, to gobreaker.State) {
+			log.Info().Msgf("Circuit Breaker: %s, changed from %v, to %v\n", name, from, to)
+		},
+	})
+
+	a.grpcServer = grpc.NewServer(
+		grpc.Creds(insecure.NewCredentials()),
+		grpc.UnaryInterceptor(
+			grpcMiddleware.ChainUnaryServer(
+				interceptor.NewCircuitBreakerInterceptor(cb).Unary,
+			),
+		),
+	)
 
 	reflection.Register(a.grpcServer)
 	projectpb.RegisterProjectServiceServer(a.grpcServer, a.serviceProvider.ProjectServer(ctx))

@@ -6,11 +6,13 @@ require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/golang-migrate/migrate/v4 v4.18.1
+	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/jackc/pgx/v5 v5.5.4
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	github.com/rs/zerolog v1.33.0
+	github.com/sony/gobreaker v1.0.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/crypto v0.27.0
 	google.golang.org/grpc v1.68.0
