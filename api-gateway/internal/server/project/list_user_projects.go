@@ -4,9 +4,10 @@ import (
 	"api-gateway/internal/errorz"
 	"api-gateway/internal/models/response"
 	"api-gateway/internal/server/helper"
+	"net/http"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"net/http"
 )
 
 func (h *Handler) ListUserProjects(w http.ResponseWriter, r *http.Request) error {

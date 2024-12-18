@@ -3,13 +3,14 @@ package app
 import (
 	"context"
 	"fmt"
+	"net"
+
 	grpcMiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/rs/zerolog/log"
 	"github.com/sony/gobreaker"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
-	"net"
 
 	"time"
 	"user-service/internal/closer"

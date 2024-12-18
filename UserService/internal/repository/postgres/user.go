@@ -2,15 +2,17 @@ package postgres
 
 import (
 	"fmt"
-	sq "github.com/Masterminds/squirrel"
 	"user-service/internal/errorz"
+
+	sq "github.com/Masterminds/squirrel"
 
 	"context"
 	"database/sql"
 	"errors"
 
-	"github.com/jmoiron/sqlx"
 	"user-service/internal/models"
+
+	"github.com/jmoiron/sqlx"
 )
 
 const (

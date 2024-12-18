@@ -6,9 +6,10 @@ import (
 	"api-gateway/internal/server/project"
 	"api-gateway/internal/server/task"
 	"api-gateway/internal/server/user"
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"net/http"
 )
 
 // NewServer инициализирует новый сервер, применяет middleware и устанавливает пути.

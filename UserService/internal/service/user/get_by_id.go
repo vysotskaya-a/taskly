@@ -2,9 +2,10 @@ package user
 
 import (
 	"context"
-	"google.golang.org/grpc/metadata"
 	"user-service/internal/errorz"
 	"user-service/internal/models"
+
+	"google.golang.org/grpc/metadata"
 )
 
 func (s *Service) GetByID(ctx context.Context, id string) (*models.User, error) {

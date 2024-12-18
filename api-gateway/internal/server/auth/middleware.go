@@ -5,9 +5,10 @@ import (
 	"api-gateway/internal/server/helper"
 	"api-gateway/internal/utils"
 	"fmt"
-	"google.golang.org/grpc/metadata"
 	"net/http"
 	"strings"
+
+	"google.golang.org/grpc/metadata"
 )
 
 // Auth middleware проверяет, авторизован ли пользователь.

@@ -2,13 +2,14 @@ package project
 
 import (
 	"context"
+	pb "project-service/pkg/api/project_v1"
+
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	pb "project-service/pkg/api/project_v1"
 )
 
 func (s *Server) ListUserProjects(ctx context.Context, req *emptypb.Empty) (*pb.ListUserProjectsResponse, error) {

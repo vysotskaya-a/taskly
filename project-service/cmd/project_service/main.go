@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
-	"github.com/rs/zerolog/log"
 	"os"
 	"project-service/internal/app"
+
+	"github.com/rs/zerolog/log"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 )

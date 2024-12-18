@@ -8,10 +8,11 @@ import (
 	userpb "api-gateway/pkg/api/user_v1"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"net/http"
 )
 
 func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) error {

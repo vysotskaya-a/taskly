@@ -8,9 +8,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"net/http"
 	"os"
+
+	"github.com/rs/zerolog/log"
 )
 
 type App struct {

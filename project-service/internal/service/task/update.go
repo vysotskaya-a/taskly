@@ -2,10 +2,11 @@ package task
 
 import (
 	"context"
-	"google.golang.org/grpc/metadata"
 	"project-service/internal/errorz"
 	"project-service/internal/models"
 	pb "project-service/pkg/api/task_v1"
+
+	"google.golang.org/grpc/metadata"
 )
 
 func (s *Service) Update(ctx context.Context, req *pb.UpdateTaskRequest) (*models.Project, error) {

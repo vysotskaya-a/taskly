@@ -2,9 +2,10 @@ package task
 
 import (
 	"context"
-	"google.golang.org/grpc/metadata"
 	"project-service/internal/errorz"
 	"project-service/internal/models"
+
+	"google.golang.org/grpc/metadata"
 )
 
 func (s *Service) Create(ctx context.Context, task *models.Task) (*models.Project, string, error) {

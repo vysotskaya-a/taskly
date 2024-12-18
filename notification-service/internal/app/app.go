@@ -3,10 +3,11 @@ package app
 import (
 	"context"
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"notification-service/internal/closer"
 	"notification-service/internal/config"
 	"notification-service/pkg/zlog"
+
+	"github.com/rs/zerolog/log"
 )
 
 type App struct {

@@ -3,11 +3,12 @@ package project
 import (
 	"context"
 	"errors"
+	"project-service/internal/errorz"
+	pb "project-service/pkg/api/project_v1"
+
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"project-service/internal/errorz"
-	pb "project-service/pkg/api/project_v1"
 )
 
 func (s *Server) SubscribeOnProjectNotifications(ctx context.Context, req *pb.SubscribeOnProjectNotificationsRequest) (*pb.SubscribeOnProjectNotificationsResponse, error) {

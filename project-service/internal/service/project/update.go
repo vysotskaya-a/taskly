@@ -2,10 +2,11 @@ package project
 
 import (
 	"context"
-	"google.golang.org/grpc/metadata"
 	"project-service/internal/errorz"
 	"project-service/internal/models"
 	pb "project-service/pkg/api/project_v1"
+
+	"google.golang.org/grpc/metadata"
 )
 
 func (s *Service) Update(ctx context.Context, req *pb.UpdateProjectRequest) error {

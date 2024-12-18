@@ -2,14 +2,15 @@ package app
 
 import (
 	"fmt"
-	"github.com/IBM/sarama"
-	"github.com/rs/zerolog/log"
 	"notification-service/internal/closer"
 	"notification-service/internal/config"
 	"notification-service/internal/kafka"
 	"notification-service/internal/kafka/consumer"
 	"notification-service/internal/telegram"
 	"notification-service/internal/telegram/notifier"
+
+	"github.com/IBM/sarama"
+	"github.com/rs/zerolog/log"
 )
 
 type serviceProvider struct {

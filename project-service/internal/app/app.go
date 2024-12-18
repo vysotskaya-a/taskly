@@ -3,8 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	"github.com/rs/zerolog/log"
-	"github.com/sony/gobreaker"
 	"net"
 	"project-service/internal/closer"
 	"project-service/internal/config"
@@ -12,6 +10,9 @@ import (
 	taskpb "project-service/pkg/api/task_v1"
 	"project-service/pkg/zlog"
 	"time"
+
+	"github.com/rs/zerolog/log"
+	"github.com/sony/gobreaker"
 
 	grpcMiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 

@@ -3,12 +3,13 @@ package user
 import (
 	"context"
 	"errors"
+	"user-service/internal/errorz"
+	pb "user-service/pkg/api/user_v1"
+
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"user-service/internal/errorz"
-	pb "user-service/pkg/api/user_v1"
 )
 
 func (s *Server) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {

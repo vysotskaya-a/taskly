@@ -8,11 +8,12 @@ import (
 	taskpb "api-gateway/pkg/api/task_v1"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"net/http"
 )
 
 func (h *Handler) CreateTask(w http.ResponseWriter, r *http.Request) error {

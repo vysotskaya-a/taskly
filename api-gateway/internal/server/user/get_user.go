@@ -6,10 +6,11 @@ import (
 	"api-gateway/internal/server/helper"
 	userpb "api-gateway/pkg/api/user_v1"
 	"fmt"
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"net/http"
 )
 
 func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) error {

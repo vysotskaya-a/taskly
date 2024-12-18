@@ -1,10 +1,11 @@
 package consumer
 
 import (
-	"github.com/IBM/sarama"
-	"github.com/rs/zerolog/log"
 	"strconv"
 	"strings"
+
+	"github.com/IBM/sarama"
+	"github.com/rs/zerolog/log"
 )
 
 // NotificationHandler обрабатывает полученные сообщения

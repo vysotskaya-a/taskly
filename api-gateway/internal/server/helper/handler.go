@@ -2,8 +2,9 @@ package helper
 
 import (
 	"errors"
-	"github.com/rs/zerolog/log"
 	"net/http"
+
+	"github.com/rs/zerolog/log"
 
 	"api-gateway/internal/models/response"
 

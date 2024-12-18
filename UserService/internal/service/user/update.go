@@ -2,11 +2,12 @@ package user
 
 import (
 	"context"
-	"golang.org/x/crypto/bcrypt"
-	"google.golang.org/grpc/metadata"
 	"user-service/internal/errorz"
 	"user-service/internal/models"
 	pb "user-service/pkg/api/user_v1"
+
+	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/grpc/metadata"
 )
 
 func (s *Service) Update(ctx context.Context, req *pb.UpdateUserRequest) error {

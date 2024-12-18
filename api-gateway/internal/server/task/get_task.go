@@ -6,10 +6,11 @@ import (
 	"api-gateway/internal/server/helper"
 	taskpb "api-gateway/pkg/api/task_v1"
 	"fmt"
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"net/http"
 )
 
 func (h *Handler) GetTask(w http.ResponseWriter, r *http.Request) error {

@@ -1,9 +1,10 @@
 package config
 
 import (
-	"github.com/IBM/sarama"
 	"os"
 	"strings"
+
+	"github.com/IBM/sarama"
 )
 
 const (

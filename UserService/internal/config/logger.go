@@ -2,9 +2,10 @@ package config
 
 import (
 	"errors"
-	"github.com/rs/zerolog"
 	"os"
 	"strconv"
+
+	"github.com/rs/zerolog"
 )
 
 var (

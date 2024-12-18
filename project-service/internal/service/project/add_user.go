@@ -2,8 +2,9 @@ package project
 
 import (
 	"context"
-	"google.golang.org/grpc/metadata"
 	"project-service/internal/errorz"
+
+	"google.golang.org/grpc/metadata"
 )
 
 func (s *Service) AddUser(ctx context.Context, newUserID, projectID string) error {

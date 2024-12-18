@@ -5,11 +5,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	sq "github.com/Masterminds/squirrel"
 	"project-service/internal/errorz"
 
-	"github.com/jmoiron/sqlx"
+	sq "github.com/Masterminds/squirrel"
+
 	"project-service/internal/models"
+
+	"github.com/jmoiron/sqlx"
 )
 
 const (

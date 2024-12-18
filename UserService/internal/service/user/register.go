@@ -3,9 +3,10 @@ package user
 import (
 	"context"
 	"errors"
-	"golang.org/x/crypto/bcrypt"
 	"user-service/internal/errorz"
 	"user-service/internal/models"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (s *Service) Register(ctx context.Context, user *models.User) (string, error) {

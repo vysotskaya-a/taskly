@@ -3,10 +3,11 @@ package postgres
 import (
 	"context"
 	"fmt"
-	sq "github.com/Masterminds/squirrel"
-	"github.com/jmoiron/sqlx"
 	"project-service/internal/errorz"
 	"project-service/internal/models"
+
+	sq "github.com/Masterminds/squirrel"
+	"github.com/jmoiron/sqlx"
 )
 
 const (

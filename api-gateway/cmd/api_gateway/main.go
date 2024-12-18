@@ -3,6 +3,7 @@ package main
 import (
 	"api-gateway/internal/app"
 	"context"
+
 	"github.com/rs/zerolog/log"
 )
 

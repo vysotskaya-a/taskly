@@ -3,12 +3,13 @@ package project
 import (
 	"context"
 	"errors"
+	"project-service/internal/errorz"
+	pb "project-service/pkg/api/project_v1"
+
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"project-service/internal/errorz"
-	pb "project-service/pkg/api/project_v1"
 )
 
 func (s *Server) UpdateProject(ctx context.Context, req *pb.UpdateProjectRequest) (*emptypb.Empty, error) {

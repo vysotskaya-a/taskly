@@ -3,12 +3,13 @@ package project
 import (
 	"context"
 	"errors"
+	"project-service/internal/errorz"
+	pb "project-service/pkg/api/project_v1"
+
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"project-service/internal/errorz"
-	pb "project-service/pkg/api/project_v1"
 )
 
 func (s *Server) GetProject(ctx context.Context, req *pb.GetProjectRequest) (*pb.GetProjectResponse, error) {

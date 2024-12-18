@@ -2,10 +2,11 @@ package auth
 
 import (
 	"context"
+	pb "user-service/pkg/api/auth_v1"
+
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	pb "user-service/pkg/api/auth_v1"
 )
 
 func (s *Server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {

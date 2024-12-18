@@ -8,10 +8,11 @@ import (
 	projectpb "api-gateway/pkg/api/project_v1"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"net/http"
 )
 
 func (h *Handler) SubscribeOnProjectNotifications(w http.ResponseWriter, r *http.Request) error {

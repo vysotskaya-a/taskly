@@ -2,8 +2,9 @@ package user
 
 import (
 	"context"
-	"google.golang.org/grpc/metadata"
 	"user-service/internal/errorz"
+
+	"google.golang.org/grpc/metadata"
 )
 
 func (s *Service) Delete(ctx context.Context, id string) error {

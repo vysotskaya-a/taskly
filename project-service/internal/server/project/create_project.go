@@ -2,12 +2,13 @@ package project
 
 import (
 	"context"
+	"project-service/internal/models"
+	pb "project-service/pkg/api/project_v1"
+
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-	"project-service/internal/models"
-	pb "project-service/pkg/api/project_v1"
 )
 
 func (s *Server) CreateProject(ctx context.Context, req *pb.CreateProjectRequest) (*pb.CreateProjectResponse, error) {

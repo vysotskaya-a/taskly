@@ -3,6 +3,7 @@ package utils
 import (
 	"api-gateway/internal/models"
 	"fmt"
+
 	"github.com/dgrijalva/jwt-go"
 )
 

@@ -1,8 +1,9 @@
 package pg
 
 import (
-	"github.com/rs/zerolog/log"
 	"os"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/jmoiron/sqlx"
 )

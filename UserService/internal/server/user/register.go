@@ -2,11 +2,12 @@ package user
 
 import (
 	"context"
+	"user-service/internal/models"
+	pb "user-service/pkg/api/user_v1"
+
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"user-service/internal/models"
-	pb "user-service/pkg/api/user_v1"
 )
 
 func (s *Server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
