@@ -11,9 +11,12 @@ import (
 	"net/http"
 )
 
+// GetRefreshToken обрабатывает запрос на получения refresh токена.
 func (h *Handler) GetRefreshToken(w http.ResponseWriter, r *http.Request) error {
+	// Получение контекста
 	ctx := r.Context()
 
+	// Декодируем тело запроса в структуру getRefreshTokenRequest
 	var getRefreshTokenRequest request.GetRefreshToken
 	if err := json.NewDecoder(r.Body).Decode(&getRefreshTokenRequest); err != nil {
 		return errorz.APIError{
@@ -23,6 +26,7 @@ func (h *Handler) GetRefreshToken(w http.ResponseWriter, r *http.Request) error 
 		}
 	}
 
+	// Получение ответа от api клиента
 	getRefreshTokenResp, err := h.authAPIClient.GetRefreshToken(ctx, &authpb.GetRefreshTokenRequest{
 		RefreshToken: getRefreshTokenRequest.RefreshToken,
 	})
@@ -34,10 +38,9 @@ func (h *Handler) GetRefreshToken(w http.ResponseWriter, r *http.Request) error 
 		}
 	}
 
+	// Формируем и возвращаем ответ
 	resp := response.GetRefreshToken{
 		RefreshToken: getRefreshTokenResp.GetRefreshToken(),
 	}
-
-	// Возвращаем ответ с токеном и статусом 200 (OK)
 	return helper.WriteJSON(w, http.StatusOK, resp)
 }

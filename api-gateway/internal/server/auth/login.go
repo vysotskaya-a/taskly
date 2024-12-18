@@ -26,6 +26,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	// Получение ответа от api клиента
 	loginResp, err := h.authAPIClient.Login(ctx, &authpb.LoginRequest{
 		Email:    loginRequest.Email,
 		Password: loginRequest.Password,
@@ -38,10 +39,9 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	// Формируем и возвращаем ответ
 	resp := response.Login{
 		RefreshToken: loginResp.GetRefreshToken(),
 	}
-
-	// Возвращаем ответ с токеном и статусом 200 (OK)
 	return helper.WriteJSON(w, http.StatusOK, resp)
 }

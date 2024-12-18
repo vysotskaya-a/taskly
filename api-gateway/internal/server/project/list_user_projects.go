@@ -10,9 +10,12 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// ListUserProjects обрабатывает запрос на получения списка проекта пользователя.
 func (h *Handler) ListUserProjects(w http.ResponseWriter, r *http.Request) error {
+	// Получение контекста
 	ctx := r.Context()
 
+	// Получение ответа от api клиента
 	listUserProjectsResp, err := h.projectAPIClient.ListUserProjects(ctx, nil)
 	if err != nil {
 		st, _ := status.FromError(err)
@@ -33,6 +36,7 @@ func (h *Handler) ListUserProjects(w http.ResponseWriter, r *http.Request) error
 		}
 	}
 
+	// Формируем и возвращаем ответ
 	resp := make([]response.GetProject, len(listUserProjectsResp.GetProject()))
 	for i, project := range listUserProjectsResp.GetProject() {
 		resp[i] = response.GetProject{
@@ -45,6 +49,5 @@ func (h *Handler) ListUserProjects(w http.ResponseWriter, r *http.Request) error
 			CreatedAt:                    project.GetCreatedAt().AsTime(),
 		}
 	}
-
 	return helper.WriteJSON(w, http.StatusOK, response.ListUserProjects{Projects: resp})
 }

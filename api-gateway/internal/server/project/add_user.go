@@ -16,7 +16,9 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// AddUser обрабатывает запрос на добавления пользователя в проект.
 func (h *Handler) AddUser(w http.ResponseWriter, r *http.Request) error {
+	// Получение контекста
 	ctx := r.Context()
 
 	// Получаем id пользователя из url параметров
@@ -29,6 +31,7 @@ func (h *Handler) AddUser(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	// Декодируем тело запроса в структуру addUserRequest
 	var addUserRequest request.AddUser
 	if err := json.NewDecoder(r.Body).Decode(&addUserRequest); err != nil {
 		return errorz.APIError{
@@ -38,6 +41,7 @@ func (h *Handler) AddUser(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	// Получение ответа от api клиента
 	_, err := h.projectAPIClient.AddUser(ctx, &projectpb.AddUserRequest{
 		ProjectID: projectID,
 		UserID:    addUserRequest.UserID,
@@ -73,6 +77,7 @@ func (h *Handler) AddUser(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	// Добавление пользователя в чат
 	_, err = h.chatApiClient.AddUserToChat(ctx, &chatpb.AddUserToChatRequest{
 		ProjectId: projectID,
 		UserId:    addUserRequest.UserID,
@@ -85,5 +90,6 @@ func (h *Handler) AddUser(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	// Возвращаем ответ
 	return helper.WriteJSON(w, http.StatusOK, response.Message{Message: "user added successfully"})
 }

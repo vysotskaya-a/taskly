@@ -39,6 +39,7 @@ type grpcConfig struct {
 	chatServerPort    string
 }
 
+// NewGRPCConfig инициализирует grpc конфиг.
 func NewGRPCConfig() (GRPCConfig, error) {
 	userServerHost := os.Getenv(grpcUserServerHostEnvName)
 	if len(userServerHost) == 0 {

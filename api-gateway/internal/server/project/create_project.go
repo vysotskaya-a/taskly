@@ -15,9 +15,12 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// CreateProject обрабатывает запрос на создание проекта.
 func (h *Handler) CreateProject(w http.ResponseWriter, r *http.Request) error {
+	// Получение контекста
 	ctx := r.Context()
 
+	// Декодируем тело запроса в структуру createProjectRequest
 	var createProjectRequest request.CreateProject
 	if err := json.NewDecoder(r.Body).Decode(&createProjectRequest); err != nil {
 		return errorz.APIError{
@@ -27,6 +30,7 @@ func (h *Handler) CreateProject(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	// Получение ответа от api клиента
 	createProjectResp, err := h.projectAPIClient.CreateProject(ctx, &projectpb.CreateProjectRequest{
 		Title:       createProjectRequest.Title,
 		Description: createProjectRequest.Description,
@@ -51,14 +55,16 @@ func (h *Handler) CreateProject(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	// Создание нового чата
 	_, err = h.chatApiClient.CreateChat(ctx, &chatpb.CreateChatRequest{
 		ProjectId: createProjectResp.GetId(),
 		Name:      createProjectRequest.Title,
 		Member:    createProjectRequest.Users,
 	})
+
+	// Формируем и возвращаем ответ
 	resp := response.CreateProject{
 		ID: createProjectResp.GetId(),
 	}
-
 	return helper.WriteJSON(w, http.StatusCreated, resp)
 }

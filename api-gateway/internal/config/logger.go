@@ -32,6 +32,7 @@ type loggerConfig struct {
 	logLevel zerolog.Level
 }
 
+// NewLoggerConfig инициализирует конфиг логгера.
 func NewLoggerConfig() (LoggerConfig, error) {
 	isPretty, err := strconv.ParseBool(os.Getenv(isPrettyEnvName))
 	if err != nil {

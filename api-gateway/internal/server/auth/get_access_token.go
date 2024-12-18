@@ -11,9 +11,12 @@ import (
 	"net/http"
 )
 
+// GetAccessToken обрабатывает запрос на получения access токена.
 func (h *Handler) GetAccessToken(w http.ResponseWriter, r *http.Request) error {
+	// Получение контекста
 	ctx := r.Context()
 
+	// Декодируем тело запроса в структуру getAccessTokenRequest
 	var getAccessTokenRequest request.GetAccessToken
 	if err := json.NewDecoder(r.Body).Decode(&getAccessTokenRequest); err != nil {
 		return errorz.APIError{
@@ -23,6 +26,7 @@ func (h *Handler) GetAccessToken(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	// Получение ответа от api клиента
 	getAccessTokenResp, err := h.authAPIClient.GetAccessToken(ctx, &authpb.GetAccessTokenRequest{
 		RefreshToken: getAccessTokenRequest.RefreshToken,
 	})
@@ -34,10 +38,9 @@ func (h *Handler) GetAccessToken(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	// Формируем и возвращаем ответ
 	resp := response.GetAccessToken{
 		AccessToken: getAccessTokenResp.GetAccessToken(),
 	}
-
-	// Возвращаем ответ с токеном и статусом 200 (OK)
 	return helper.WriteJSON(w, http.StatusOK, resp)
 }

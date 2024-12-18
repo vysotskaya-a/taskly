@@ -15,7 +15,9 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// SubscribeOnProjectNotifications обрабатывает запрос на подписку на уведомления проекта.
 func (h *Handler) SubscribeOnProjectNotifications(w http.ResponseWriter, r *http.Request) error {
+	// Получение контекста
 	ctx := r.Context()
 
 	// Получаем id пользователя из url параметров
@@ -28,6 +30,7 @@ func (h *Handler) SubscribeOnProjectNotifications(w http.ResponseWriter, r *http
 		}
 	}
 
+	// Декодируем тело запроса в структуру getAccessTokenRequest
 	var subscribeOnProjectNotificationsRequest request.SubscribeOnProjectNotifications
 	if err := json.NewDecoder(r.Body).Decode(&subscribeOnProjectNotificationsRequest); err != nil {
 		return errorz.APIError{
@@ -37,6 +40,7 @@ func (h *Handler) SubscribeOnProjectNotifications(w http.ResponseWriter, r *http
 		}
 	}
 
+	// Получение ответа от api клиента
 	subscribeOnProjectNotificationsResp, err := h.projectAPIClient.SubscribeOnProjectNotifications(ctx, &projectpb.SubscribeOnProjectNotificationsRequest{
 		ProjectID:  projectID,
 		TelegramID: subscribeOnProjectNotificationsRequest.TelegramID,
@@ -72,5 +76,6 @@ func (h *Handler) SubscribeOnProjectNotifications(w http.ResponseWriter, r *http
 		}
 	}
 
+	// Возвращаем ответ
 	return helper.WriteJSON(w, http.StatusOK, response.Message{Message: subscribeOnProjectNotificationsResp.GetMsg()})
 }

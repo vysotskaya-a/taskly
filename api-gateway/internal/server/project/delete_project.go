@@ -14,7 +14,9 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// DeleteProject обрабатывает запрос на удаление проекта.
 func (h *Handler) DeleteProject(w http.ResponseWriter, r *http.Request) error {
+	// Получение контекста
 	ctx := r.Context()
 
 	// Получаем id пользователя из url параметров
@@ -27,6 +29,7 @@ func (h *Handler) DeleteProject(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	// Получение ответа от api клиента
 	_, err := h.projectAPIClient.DeleteProject(ctx, &projectpb.DeleteProjectRequest{
 		Id: projectID,
 	})
@@ -61,6 +64,7 @@ func (h *Handler) DeleteProject(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	// Удаление чата
 	_, err = h.chatApiClient.DeleteChat(ctx, &chatpb.DeleteChatRequest{
 		ProjectId: projectID,
 	})

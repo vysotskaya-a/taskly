@@ -13,7 +13,9 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// GetProject обрабатывает запрос на получения проекта.
 func (h *Handler) GetProject(w http.ResponseWriter, r *http.Request) error {
+	// Получение контекста
 	ctx := r.Context()
 
 	// Получаем id пользователя из url параметров
@@ -26,6 +28,7 @@ func (h *Handler) GetProject(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	// Получение ответа от api клиента
 	getProjectResp, err := h.projectAPIClient.GetProject(ctx, &projectpb.GetProjectRequest{
 		Id: projectID,
 	})
@@ -60,6 +63,7 @@ func (h *Handler) GetProject(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	// Формируем и возвращаем ответ
 	resp := response.GetProject{
 		ID:                           getProjectResp.GetProject().GetId(),
 		Title:                        getProjectResp.GetProject().GetTitle(),
@@ -69,6 +73,5 @@ func (h *Handler) GetProject(w http.ResponseWriter, r *http.Request) error {
 		NotificationSubscribersTGIds: getProjectResp.GetProject().GetNotificationSubscribersTgIds(),
 		CreatedAt:                    getProjectResp.GetProject().GetCreatedAt().AsTime(),
 	}
-
 	return helper.WriteJSON(w, http.StatusOK, resp)
 }

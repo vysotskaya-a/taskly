@@ -25,6 +25,7 @@ type httpConfig struct {
 	port string
 }
 
+// NewHTTPConfig инициализирует http конфиг.
 func NewHTTPConfig() (HTTPConfig, error) {
 	host := os.Getenv(httpHostEnvName)
 	if len(host) == 0 {

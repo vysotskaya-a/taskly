@@ -14,11 +14,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// App структура приложения, содержащая сервис провайдер и http сервер.
 type App struct {
 	serviceProvider *serviceProvider
 	httpServer      *http.Server
 }
 
+// NewApp инициализирует зависимости и создаёт новое приложение.
 func NewApp(ctx context.Context) (*App, error) {
 	a := &App{}
 
@@ -30,6 +32,7 @@ func NewApp(ctx context.Context) (*App, error) {
 	return a, nil
 }
 
+// Run запускает http сервер.
 func (a *App) Run() error {
 	defer func() {
 		closer.CloseAll()
@@ -39,6 +42,7 @@ func (a *App) Run() error {
 	return a.runHTTPServer()
 }
 
+// Инициализация зависимостей.
 func (a *App) initDeps(ctx context.Context) error {
 	inits := []func(context.Context) error{
 		//a.initConfig,
@@ -57,6 +61,7 @@ func (a *App) initDeps(ctx context.Context) error {
 	return nil
 }
 
+// Инициализация конфига.
 func (a *App) initConfig(_ context.Context) error {
 	err := config.Load(".env")
 	if err != nil {
@@ -66,11 +71,13 @@ func (a *App) initConfig(_ context.Context) error {
 	return nil
 }
 
+// Инициализация сервис провайдера.
 func (a *App) initServiceProvider(_ context.Context) error {
 	a.serviceProvider = newServiceProvider()
 	return nil
 }
 
+// Инициализация логгера.
 func (a *App) initLogger(_ context.Context) error {
 	cfg := a.serviceProvider.LoggerConfig()
 
@@ -79,6 +86,7 @@ func (a *App) initLogger(_ context.Context) error {
 	return nil
 }
 
+// Инициализация http сервера.
 func (a *App) initHTTPServer(_ context.Context) error {
 	srv := server.NewServer(a.serviceProvider.UserHandler(), a.serviceProvider.AuthHandler(), a.serviceProvider.ProjectHandler(), a.serviceProvider.TaskHandler(), a.serviceProvider.ChatHandler())
 
@@ -91,6 +99,7 @@ func (a *App) initHTTPServer(_ context.Context) error {
 	return nil
 }
 
+// Запуск http сервера.
 func (a *App) runHTTPServer() error {
 	if err := a.httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal().Err(err).Msg("Error starting http server")
