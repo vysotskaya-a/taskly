@@ -65,6 +65,31 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    container_name: redis
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - taskly
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    restart: always
+    ports:
+      - "27017:27017"
+    networks:
+      - taskly
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+
 
   user_service:
     container_name: user_service
@@ -112,9 +137,32 @@ services:
       - user_service
       - project_service
       - notification_service
-
+      - chat_service
     env_file:
       - ./api-gateway/.env
+  
+  chat_service:
+    container_name: chat_service
+    image: chat-service:latest
+    restart: on-failure
+    networks:
+      - taskly
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    env_file:
+      - ./chat-service/.env
+      # MONGODB_URI=mongodb://mongo:27017
+      # REDIS_ADDR=redis:6379
+      # STREAM_NAME=chat-stream
+      # GROUP_NAME=chat-group
+      # CONSUMER_NAME=chat-consumer
+      # PUBLISH_CHANNEL=chat-channel
+      # GRPC_PORT=50050
+
+    
 
 networks:
   taskly:
