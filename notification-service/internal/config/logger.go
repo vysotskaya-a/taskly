@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	errIsPrettyNotFound = errors.New("is pretty not found")
-	errVersionNotFound  = errors.New("version not found")
-	errLogLevelNotFound = errors.New("log level not found")
+	ErrIsPrettyNotFound = errors.New("is pretty not found")
+	ErrVersionNotFound  = errors.New("version not found")
+	ErrLogLevelNotFound = errors.New("log level not found")
 )
 
 const (
@@ -35,17 +35,17 @@ type loggerConfig struct {
 func NewLoggerConfig() (LoggerConfig, error) {
 	isPretty, err := strconv.ParseBool(os.Getenv(isPrettyEnvName))
 	if err != nil {
-		return nil, errIsPrettyNotFound
+		return nil, ErrIsPrettyNotFound
 	}
 
 	version := os.Getenv(versionEnvName)
 	if len(version) == 0 {
-		return nil, errVersionNotFound
+		return nil, ErrVersionNotFound
 	}
 
 	logLevel, err := zerolog.ParseLevel(os.Getenv(logLevelEnvName))
 	if err != nil {
-		return nil, errLogLevelNotFound
+		return nil, ErrLogLevelNotFound
 	}
 
 	return &loggerConfig{
