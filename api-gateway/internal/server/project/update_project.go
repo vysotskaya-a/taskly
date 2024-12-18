@@ -5,6 +5,7 @@ import (
 	"api-gateway/internal/models/request"
 	"api-gateway/internal/models/response"
 	"api-gateway/internal/server/helper"
+	chatpb "api-gateway/pkg/api/chat_v1"
 	projectpb "api-gateway/pkg/api/project_v1"
 	"encoding/json"
 	"fmt"
@@ -73,6 +74,13 @@ func (h *Handler) UpdateProject(w http.ResponseWriter, r *http.Request) error {
 			}
 		}
 	}
+
+	_, err = h.chatApiClient.UpdateChat(ctx, &chatpb.UpdateChatRequest{
+		Chat: &chatpb.Chat{
+			ChatId: projectID,
+			Name:   updateProjectRequest.Title,
+		},
+	})
 
 	return helper.WriteJSON(w, http.StatusOK, response.Message{Message: "project updated successfully"})
 }

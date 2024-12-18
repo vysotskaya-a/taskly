@@ -4,15 +4,21 @@ import (
 	"api-gateway/internal/closer"
 	"api-gateway/internal/config"
 	"api-gateway/internal/server/auth"
+	"api-gateway/internal/server/chat"
 	"api-gateway/internal/server/project"
 	"api-gateway/internal/server/task"
 	"api-gateway/internal/server/user"
+	"api-gateway/internal/service"
 	authpb "api-gateway/pkg/api/auth_v1"
+	chatpb "api-gateway/pkg/api/chat_v1"
 	projectpb "api-gateway/pkg/api/project_v1"
 	taskpb "api-gateway/pkg/api/task_v1"
 	userpb "api-gateway/pkg/api/user_v1"
+	rdb "api-gateway/pkg/redis"
 	"fmt"
 
+
+	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -22,6 +28,11 @@ type serviceProvider struct {
 	httpConfig   config.HTTPConfig
 	loggerConfig config.LoggerConfig
 	jwtConfig    config.JWTConfig
+	redisConfig  config.RedisConfig
+
+	redis *redis.Client
+
+	chatService *service.Chat
 
 	userClientConn *grpc.ClientConn
 	authAPIClient  authpb.AuthV1Client
@@ -30,11 +41,14 @@ type serviceProvider struct {
 	projectClientConn *grpc.ClientConn
 	projectAPIClient  projectpb.ProjectServiceClient
 	taskAPIClient     taskpb.TaskServiceClient
+	chatAPIClient     chatpb.ChatServiceClient
+	chatClientConn    *grpc.ClientConn
 
 	userHandler    *user.Handler
 	authHandler    *auth.Handler
 	projectHandler *project.Handler
 	taskHandler    *task.Handler
+	chatHandler    *chat.Handler
 }
 
 func newServiceProvider() *serviceProvider {
@@ -92,6 +106,35 @@ func (s *serviceProvider) JWTConfig() config.JWTConfig {
 	return s.jwtConfig
 }
 
+func (s *serviceProvider) RedisConfig() config.RedisConfig {
+	if s.redisConfig == nil {
+		cfg, err := config.NewRedisConfig()
+		if err != nil {
+			panic(fmt.Errorf("failed to get redis config: %w", err))
+		}
+
+		s.redisConfig = cfg
+	}
+
+	return s.redisConfig
+}
+
+func (s *serviceProvider) Redis() *redis.Client {
+	if s.redis == nil {
+		cfg := s.RedisConfig()
+		s.redis = rdb.New(cfg)
+		closer.Add(s.redis.Close)
+	}
+	return s.redis
+}
+
+func (s *serviceProvider) ChatService() *service.Chat {
+	if s.chatService == nil {
+		s.chatService = service.NewChat(s.Redis())
+	}
+	return s.chatService
+}
+
 func (s *serviceProvider) UserClientConn() *grpc.ClientConn {
 	if s.userClientConn == nil {
 		conn, err := grpc.NewClient(s.GRPCConfig().UserServerAddress(), grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -130,6 +173,18 @@ func (s *serviceProvider) ProjectClientConn() *grpc.ClientConn {
 	return s.projectClientConn
 }
 
+func (s *serviceProvider) ChatClientConn() *grpc.ClientConn {
+	if s.chatClientConn == nil {
+		conn, err := grpc.NewClient(s.GRPCConfig().ChatServerAddress(), grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			panic(fmt.Errorf("failed to connect to gRPC chat server: %w", err))
+		}
+		closer.Add(conn.Close)
+		s.chatClientConn = conn
+	}
+	return s.chatClientConn
+}
+
 func (s *serviceProvider) ProjectAPIClient() projectpb.ProjectServiceClient {
 	if s.projectAPIClient == nil {
 		s.projectAPIClient = projectpb.NewProjectServiceClient(s.ProjectClientConn())
@@ -142,6 +197,13 @@ func (s *serviceProvider) TaskAPIClient() taskpb.TaskServiceClient {
 		s.taskAPIClient = taskpb.NewTaskServiceClient(s.ProjectClientConn())
 	}
 	return s.taskAPIClient
+}
+
+func (s *serviceProvider) ChatAPIClient() chatpb.ChatServiceClient {
+	if s.chatAPIClient == nil {
+		s.chatAPIClient = chatpb.NewChatServiceClient(s.ChatClientConn())
+	}
+	return s.chatAPIClient
 }
 
 func (s *serviceProvider) UserHandler() *user.Handler {
@@ -160,7 +222,7 @@ func (s *serviceProvider) AuthHandler() *auth.Handler {
 
 func (s *serviceProvider) ProjectHandler() *project.Handler {
 	if s.projectHandler == nil {
-		s.projectHandler = project.NewHandler(s.ProjectAPIClient())
+		s.projectHandler = project.NewHandler(s.ProjectAPIClient(), s.ChatAPIClient())
 	}
 	return s.projectHandler
 }
@@ -170,4 +232,11 @@ func (s *serviceProvider) TaskHandler() *task.Handler {
 		s.taskHandler = task.NewHandler(s.TaskAPIClient())
 	}
 	return s.taskHandler
+}
+
+func (s *serviceProvider) ChatHandler() *chat.Handler {
+	if s.chatHandler == nil {
+		s.chatHandler = chat.NewHandler(s.ChatAPIClient(), s.ChatService())
+	}
+	return s.chatHandler
 }
