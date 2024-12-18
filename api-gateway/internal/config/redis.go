@@ -44,6 +44,7 @@ func (cfg *redisConfig) Db() int {
 	return cfg.db
 }
 
+// NewRedisConfig инициализирует конфиг редиса.
 func NewRedisConfig() (RedisConfig, error) {
 	host := os.Getenv(redisHostEnvName)
 	if len(host) == 0 {

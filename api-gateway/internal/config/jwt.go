@@ -21,6 +21,7 @@ type jwtConfig struct {
 	accessTokenSecret string
 }
 
+// NewJWTConfig инициализирует jwt конфиг.
 func NewJWTConfig() (JWTConfig, error) {
 	accessTokenSecret := os.Getenv(accessTokenSecretEnvName)
 	if len(accessTokenSecret) == 0 {

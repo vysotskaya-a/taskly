@@ -16,7 +16,9 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// UpdateProject обрабатывает запрос на обновление проекта.
 func (h *Handler) UpdateProject(w http.ResponseWriter, r *http.Request) error {
+	// Получение контекста
 	ctx := r.Context()
 
 	// Получаем id пользователя из url параметров
@@ -29,6 +31,7 @@ func (h *Handler) UpdateProject(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	// Декодируем тело запроса в структуру getAccessTokenRequest
 	var updateProjectRequest request.UpdateProject
 	if err := json.NewDecoder(r.Body).Decode(&updateProjectRequest); err != nil {
 		return errorz.APIError{
@@ -38,6 +41,7 @@ func (h *Handler) UpdateProject(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	// Получение ответа от api клиента
 	_, err := h.projectAPIClient.UpdateProject(ctx, &projectpb.UpdateProjectRequest{
 		Id:          projectID,
 		Title:       updateProjectRequest.Title,
@@ -75,6 +79,7 @@ func (h *Handler) UpdateProject(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
+	// Обновляем чат
 	_, err = h.chatApiClient.UpdateChat(ctx, &chatpb.UpdateChatRequest{
 		Chat: &chatpb.Chat{
 			ChatId: projectID,
@@ -82,5 +87,6 @@ func (h *Handler) UpdateProject(w http.ResponseWriter, r *http.Request) error {
 		},
 	})
 
+	// Возвращаем ответ
 	return helper.WriteJSON(w, http.StatusOK, response.Message{Message: "project updated successfully"})
 }

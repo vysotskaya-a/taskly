@@ -17,12 +17,12 @@ import (
 	rdb "api-gateway/pkg/redis"
 	"fmt"
 
-
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+// Структура сервис провайдера.
 type serviceProvider struct {
 	grpcConfig   config.GRPCConfig
 	httpConfig   config.HTTPConfig
@@ -51,10 +51,12 @@ type serviceProvider struct {
 	chatHandler    *chat.Handler
 }
 
+// Инициализирует сервис провайдер.
 func newServiceProvider() *serviceProvider {
 	return &serviceProvider{}
 }
 
+// GRPCConfig геттер для grpc конфига.
 func (s *serviceProvider) GRPCConfig() config.GRPCConfig {
 	if s.grpcConfig == nil {
 		cfg, err := config.NewGRPCConfig()
@@ -68,6 +70,7 @@ func (s *serviceProvider) GRPCConfig() config.GRPCConfig {
 	return s.grpcConfig
 }
 
+// HTTPConfig геттер для http конфига.
 func (s *serviceProvider) HTTPConfig() config.HTTPConfig {
 	if s.httpConfig == nil {
 		cfg, err := config.NewHTTPConfig()
@@ -80,6 +83,7 @@ func (s *serviceProvider) HTTPConfig() config.HTTPConfig {
 	return s.httpConfig
 }
 
+// LoggerConfig геттер для конфига логгера.
 func (s *serviceProvider) LoggerConfig() config.LoggerConfig {
 	if s.loggerConfig == nil {
 		cfg, err := config.NewLoggerConfig()
@@ -93,6 +97,7 @@ func (s *serviceProvider) LoggerConfig() config.LoggerConfig {
 	return s.loggerConfig
 }
 
+// JWTConfig геттер для jwt конфига.
 func (s *serviceProvider) JWTConfig() config.JWTConfig {
 	if s.jwtConfig == nil {
 		cfg, err := config.NewJWTConfig()
@@ -106,6 +111,7 @@ func (s *serviceProvider) JWTConfig() config.JWTConfig {
 	return s.jwtConfig
 }
 
+// RedisConfig геттер для redis конфига.
 func (s *serviceProvider) RedisConfig() config.RedisConfig {
 	if s.redisConfig == nil {
 		cfg, err := config.NewRedisConfig()
@@ -119,6 +125,7 @@ func (s *serviceProvider) RedisConfig() config.RedisConfig {
 	return s.redisConfig
 }
 
+// Redis геттер для redis.
 func (s *serviceProvider) Redis() *redis.Client {
 	if s.redis == nil {
 		cfg := s.RedisConfig()
@@ -128,6 +135,7 @@ func (s *serviceProvider) Redis() *redis.Client {
 	return s.redis
 }
 
+// ChatService геттер для сервиса чата.
 func (s *serviceProvider) ChatService() *service.Chat {
 	if s.chatService == nil {
 		s.chatService = service.NewChat(s.Redis())
@@ -135,6 +143,7 @@ func (s *serviceProvider) ChatService() *service.Chat {
 	return s.chatService
 }
 
+// UserClientConn геттер для connection к клиенту User Servic'а.
 func (s *serviceProvider) UserClientConn() *grpc.ClientConn {
 	if s.userClientConn == nil {
 		conn, err := grpc.NewClient(s.GRPCConfig().UserServerAddress(), grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -147,6 +156,7 @@ func (s *serviceProvider) UserClientConn() *grpc.ClientConn {
 	return s.userClientConn
 }
 
+// AuthAPIClient геттер для клиента auth api.
 func (s *serviceProvider) AuthAPIClient() authpb.AuthV1Client {
 	if s.authAPIClient == nil {
 		s.authAPIClient = authpb.NewAuthV1Client(s.UserClientConn())
@@ -154,6 +164,7 @@ func (s *serviceProvider) AuthAPIClient() authpb.AuthV1Client {
 	return s.authAPIClient
 }
 
+// UserAPIClient геттер для клиента user api.
 func (s *serviceProvider) UserAPIClient() userpb.UserV1Client {
 	if s.userAPIClient == nil {
 		s.userAPIClient = userpb.NewUserV1Client(s.UserClientConn())
@@ -161,6 +172,7 @@ func (s *serviceProvider) UserAPIClient() userpb.UserV1Client {
 	return s.userAPIClient
 }
 
+// ProjectClientConn геттер для connection к клиенту Project Servic'а.
 func (s *serviceProvider) ProjectClientConn() *grpc.ClientConn {
 	if s.projectClientConn == nil {
 		conn, err := grpc.NewClient(s.GRPCConfig().ProjectServerAddress(), grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -173,6 +185,7 @@ func (s *serviceProvider) ProjectClientConn() *grpc.ClientConn {
 	return s.projectClientConn
 }
 
+// ChatClientConn геттер для connection к клиенту Chat Servic'а.
 func (s *serviceProvider) ChatClientConn() *grpc.ClientConn {
 	if s.chatClientConn == nil {
 		conn, err := grpc.NewClient(s.GRPCConfig().ChatServerAddress(), grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -185,6 +198,7 @@ func (s *serviceProvider) ChatClientConn() *grpc.ClientConn {
 	return s.chatClientConn
 }
 
+// ProjectAPIClient геттер для клиента для project api.
 func (s *serviceProvider) ProjectAPIClient() projectpb.ProjectServiceClient {
 	if s.projectAPIClient == nil {
 		s.projectAPIClient = projectpb.NewProjectServiceClient(s.ProjectClientConn())
@@ -192,6 +206,7 @@ func (s *serviceProvider) ProjectAPIClient() projectpb.ProjectServiceClient {
 	return s.projectAPIClient
 }
 
+// TaskAPIClient геттер для клиента для task api.
 func (s *serviceProvider) TaskAPIClient() taskpb.TaskServiceClient {
 	if s.taskAPIClient == nil {
 		s.taskAPIClient = taskpb.NewTaskServiceClient(s.ProjectClientConn())
@@ -199,6 +214,7 @@ func (s *serviceProvider) TaskAPIClient() taskpb.TaskServiceClient {
 	return s.taskAPIClient
 }
 
+// ChatAPIClient геттер для клиента для chat api.
 func (s *serviceProvider) ChatAPIClient() chatpb.ChatServiceClient {
 	if s.chatAPIClient == nil {
 		s.chatAPIClient = chatpb.NewChatServiceClient(s.ChatClientConn())
@@ -206,6 +222,7 @@ func (s *serviceProvider) ChatAPIClient() chatpb.ChatServiceClient {
 	return s.chatAPIClient
 }
 
+// UserHandler геттер для User Handler'а.
 func (s *serviceProvider) UserHandler() *user.Handler {
 	if s.userHandler == nil {
 		s.userHandler = user.NewHandler(s.UserAPIClient())
@@ -213,6 +230,7 @@ func (s *serviceProvider) UserHandler() *user.Handler {
 	return s.userHandler
 }
 
+// AuthHandler геттер для Auth Handler'а.
 func (s *serviceProvider) AuthHandler() *auth.Handler {
 	if s.authHandler == nil {
 		s.authHandler = auth.NewHandler(s.AuthAPIClient(), s.JWTConfig())
@@ -220,6 +238,7 @@ func (s *serviceProvider) AuthHandler() *auth.Handler {
 	return s.authHandler
 }
 
+// ProjectHandler геттер для Project Handler'а.
 func (s *serviceProvider) ProjectHandler() *project.Handler {
 	if s.projectHandler == nil {
 		s.projectHandler = project.NewHandler(s.ProjectAPIClient(), s.ChatAPIClient())
@@ -227,6 +246,7 @@ func (s *serviceProvider) ProjectHandler() *project.Handler {
 	return s.projectHandler
 }
 
+// TaskHandler геттер для Task Handler'а.
 func (s *serviceProvider) TaskHandler() *task.Handler {
 	if s.taskHandler == nil {
 		s.taskHandler = task.NewHandler(s.TaskAPIClient())
@@ -234,6 +254,7 @@ func (s *serviceProvider) TaskHandler() *task.Handler {
 	return s.taskHandler
 }
 
+// ChatHandler геттер для Chat Handler'а.
 func (s *serviceProvider) ChatHandler() *chat.Handler {
 	if s.chatHandler == nil {
 		s.chatHandler = chat.NewHandler(s.ChatAPIClient(), s.ChatService())
