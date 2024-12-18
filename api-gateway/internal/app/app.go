@@ -40,7 +40,7 @@ func (a *App) Run() error {
 
 func (a *App) initDeps(ctx context.Context) error {
 	inits := []func(context.Context) error{
-		a.initConfig,
+		//a.initConfig,
 		a.initServiceProvider,
 		a.initLogger,
 		a.initHTTPServer,

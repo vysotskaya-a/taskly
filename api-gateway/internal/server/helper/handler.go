@@ -2,6 +2,7 @@ package helper
 
 import (
 	"errors"
+	"github.com/rs/zerolog/log"
 	"net/http"
 
 	"api-gateway/internal/models/response"
@@ -16,6 +17,7 @@ func MakeHandler(fn func(http.ResponseWriter, *http.Request) error) http.Handler
 		if err := fn(w, r); err != nil {
 			var e errorz.APIError
 			if errors.As(err, &e) {
+				log.Error().Msg(err.Error())
 				WriteJSON(w, e.Status, response.Error{Error: e.Msg})
 			}
 		}
