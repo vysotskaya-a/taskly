@@ -1,0 +1,124 @@
+version: '3.8'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    restart: always
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - taskly
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    restart: always
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper
+    networks:
+      - taskly
+
+  user_service_database:
+    container_name: user_service_database
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=${USER_SERVICE_PG_USER}
+      - POSTGRES_PASSWORD=${USER_SERVICE_PG_PASS}
+      - POSTGRES_DB=${USER_SERVICE_PG_DB}
+    image: postgres:16.2-alpine3.19
+    networks:
+      - taskly
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -h ${USER_SERVICE_PG_HOST} -p 5432 -U ${USER_SERVICE_PG_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  project_service_database:
+    container_name: project_service_database
+    restart: always
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_USER=${PROJECT_SERVICE_PG_USER}
+      - POSTGRES_PASSWORD=${PROJECT_SERVICE_PG_PASS}
+      - POSTGRES_DB=${PROJECT_SERVICE_PG_DB}
+    image: postgres:16.2-alpine3.19
+    networks:
+      - taskly
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -h ${PROJECT_SERVICE_PG_HOST} -p 5432 -U ${PROJECT_SERVICE_PG_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  user_service:
+    container_name: user_service
+    image: user-service:latest
+    restart: on-failure
+    networks:
+      - taskly
+    depends_on:
+      - user_service_database
+    env_file:
+      - ./UserService/.env
+
+  project_service:
+    container_name: project_service
+    image: project-service:latest
+    restart: on-failure
+    networks:
+      - taskly
+    depends_on:
+      - kafka
+      - project_service_database
+    env_file:
+      - ./project-service/.env
+
+  notification_service:
+    container_name: notification_service
+    image: notification-service:latest
+    restart: on-failure
+    networks:
+      - taskly
+    depends_on:
+      - kafka
+    env_file:
+      - ./notification-service/.env
+
+  api_gateway:
+    container_name: api_gateway
+    image: api-gateway:latest
+    restart: on-failure
+    ports:
+      - "8090:8090"
+    networks:
+      - taskly
+    depends_on:
+      - user_service
+      - project_service
+      - notification_service
+
+    env_file:
+      - ./api-gateway/.env
+
+networks:
+  taskly:
+    driver: bridge
+
+
+
