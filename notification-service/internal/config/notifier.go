@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	errBotTokenNotFound = errors.New("bot token not found")
+	ErrBotTokenNotFound = errors.New("bot token not found")
 )
 
 const (
@@ -24,7 +24,7 @@ type notifierConfig struct {
 func NewNotifierConfig() (NotifierConfig, error) {
 	botToken := os.Getenv(botTokenEnvName)
 	if len(botToken) == 0 {
-		return nil, errBotTokenNotFound
+		return nil, ErrBotTokenNotFound
 	}
 
 	return &notifierConfig{
