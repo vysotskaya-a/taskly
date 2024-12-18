@@ -200,3 +200,43 @@ func (c *chatRepository) GetChat(ctx context.Context, projectID string) (*entity
 	}
 	return &chat, err
 }
+
+func (c *chatRepository) DeleteChat(ctx context.Context, projectID string) error {
+	const op = prefix + ".DeleteChat"
+	_, err := c.db.Collection("chats").DeleteOne(ctx, bson.M{"project_id": projectID})
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return errorz.Wrap(errorz.ErrNotFound, op)
+		}
+		return errorz.WrapInternal(err, op)
+	}
+	return nil
+}
+
+func (c *chatRepository) DeleteMessages(ctx context.Context, projectID string) error {
+	const op = prefix + ".DeleteMessages"
+	_, err := c.db.Collection("messages").DeleteMany(ctx, bson.M{"chat_id": projectID})
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return errorz.Wrap(errorz.ErrNotFound, op)
+		}
+		return errorz.WrapInternal(err, op)
+	}
+	return nil
+}
+
+func (c *chatRepository) UpdateChat(ctx context.Context, projectID string, chat *entity.Chat) error {
+	const op = prefix + ".UpdateChat"
+	var update bson.M
+	if chat.Name != "" {
+		update = bson.M{"$set": bson.M{"name": chat.Name}}
+	}
+	_, err := c.db.Collection("chats").UpdateOne(ctx, bson.M{"project_id": projectID}, update)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return errorz.Wrap(errorz.ErrNotFound, op)
+		}
+		return errorz.WrapInternal(err, op)
+	}
+	return nil
+}

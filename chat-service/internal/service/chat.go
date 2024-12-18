@@ -25,6 +25,10 @@ type ChatRepository interface {
 
 	RemoveUserFromChat(ctx context.Context, projecID string, userID string) error
 
+	DeleteChat(ctx context.Context, projectID string) error
+	DeleteMessages(ctx context.Context, projectID string) error
+	UpdateChat(ctx context.Context, projectID string, chat *entity.Chat) error
+
 	IsUserInChat(ctx context.Context, projecID string, userID string) (bool, error)
 }
 
@@ -210,4 +214,15 @@ func (s *chatService) SetMessagesToCache(ctx context.Context, projectID string, 
 	}
 
 	return nil
+}
+
+func (s *chatService) DeleteChat(ctx context.Context, projectID string) error {
+	if err := s.repo.DeleteMessages(ctx, projectID); err != nil {
+		return err
+	}
+	return s.repo.DeleteChat(ctx, projectID)
+}
+
+func (s *chatService) UpdateChat(ctx context.Context, projectID string, chat *entity.Chat) error {
+	return s.repo.UpdateChat(ctx, projectID, chat)
 }

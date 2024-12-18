@@ -12,7 +12,18 @@ service ChatService {
     rpc RemoveUserFromChat(RemoveUserFromChatRequest) returns (RemoveUserFromChatResponse);
     rpc GetMessages(GetMessagesRequest) returns (GetMessagesResponse);
     rpc GetChat(GetChatRequest) returns (GetChatResponse);
+    rpc DeleteChat(DeleteChatRequest) returns (DeleteChatResponse);
+    rpc UpdateChat(UpdateChatRequest) returns (UpdateChatResponse);
 }
+
+message DeleteChatRequest {
+    string project_id = 1;
+}
+
+message DeleteChatResponse {
+    string project_id = 1;
+}
+
 
 message Message {
     string message_id = 1;
@@ -28,6 +39,14 @@ message Chat {
     string name = 3;
     string created_at = 4;
     repeated string members = 5;
+}
+
+message UpdateChatRequest {
+    Chat chat = 1;
+}
+
+message UpdateChatResponse {
+    Chat chat = 1;
 }
 
 message GetChatRequest {

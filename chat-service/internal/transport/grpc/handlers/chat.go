@@ -37,6 +37,8 @@ type ChatService interface {
 	GetUserChats(ctx context.Context, userID string) ([]string, error)
 	GetChat(ctx context.Context, projectID string) (*entity.Chat, error)
 	RemoveUserFromChat(ctx context.Context, userID string, projectID string) error
+	DeleteChat(ctx context.Context, projectID string) error
+	UpdateChat(ctx context.Context, projectID string, chat *entity.Chat) error
 }
 
 func (h *ChatHandler) AddUserToChat(ctx context.Context, req *api.AddUserToChatRequest) (*api.AddUserToChatResponse, error) {
@@ -171,4 +173,50 @@ func (s *ChatHandler) GetChat(ctx context.Context, req *api.GetChatRequest) (*ap
 	}
 	return &api.GetChatResponse{Chat: &api.Chat{Members: chat.Members, Name: chat.Name,
 		ProjectId: chat.ProjectID, ChatId: chat.GetID(), CreatedAt: chat.CreatedAt.String()}}, nil
+}
+
+func (s *ChatHandler) DeleteChat(ctx context.Context, req *api.DeleteChatRequest) (*api.DeleteChatResponse, error) {
+	if req.GetProjectId() == "" {
+		return nil, errorz.BadRequest()
+	}
+	err := s.chatService.DeleteChat(ctx, req.GetProjectId())
+	if err != nil {
+		if err := errorz.Parse(err); err != nil {
+			if err.Is(errorz.ErrNotFound) {
+				err.SetStatusCode(int(codes.NotFound))
+			}
+		}
+		return nil, err
+	}
+	if logger := logger.GetLogger(ctx); logger != nil {
+		logger.Info(ctx, "Chat deleted", zap.String("project_id", req.ProjectId))
+	}
+	return &api.DeleteChatResponse{ProjectId: req.ProjectId}, nil
+}
+
+func (s *ChatHandler) UpdateChat(ctx context.Context, req *api.UpdateChatRequest) (*api.UpdateChatResponse, error) {
+	reqChat := req.GetChat()
+	if reqChat.GetName() == "" || reqChat.GetProjectId() == "" {
+		return nil, errorz.BadRequest()
+	}
+	chat := &entity.Chat{
+		Name:    reqChat.GetName(),
+		Members: reqChat.GetMembers(),
+	}
+	err := s.chatService.UpdateChat(ctx, req.GetChat().GetChatId(), chat)
+	if err != nil {
+		if err := errorz.Parse(err); err != nil {
+			if err.Is(errorz.ErrNotFound) {
+				err.SetStatusCode(int(codes.NotFound))
+			}
+		}
+		return nil, err
+	}
+	if logger := logger.GetLogger(ctx); logger != nil {
+		logger.Info(ctx, "Chat updated", zap.String("project_id", reqChat.GetProjectId()))
+	}
+	return &api.UpdateChatResponse{Chat: &api.Chat{
+		Name:    reqChat.GetName(),
+		Members: reqChat.GetMembers(),
+	}}, nil
 }

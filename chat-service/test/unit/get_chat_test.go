@@ -4,7 +4,7 @@ import (
 	"chat-service/entity"
 	"chat-service/errorz"
 	"chat-service/internal/transport/grpc/handlers"
-	"chat-service/mocks"
+	mocks "chat-service/mocks"
 	api "chat-service/pkg/api/chat_v1"
 	"testing"
 	"time"

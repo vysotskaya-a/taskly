@@ -25,6 +25,8 @@ type ChatServiceClient interface {
 	RemoveUserFromChat(ctx context.Context, in *RemoveUserFromChatRequest, opts ...grpc.CallOption) (*RemoveUserFromChatResponse, error)
 	GetMessages(ctx context.Context, in *GetMessagesRequest, opts ...grpc.CallOption) (*GetMessagesResponse, error)
 	GetChat(ctx context.Context, in *GetChatRequest, opts ...grpc.CallOption) (*GetChatResponse, error)
+	DeleteChat(ctx context.Context, in *DeleteChatRequest, opts ...grpc.CallOption) (*DeleteChatResponse, error)
+	UpdateChat(ctx context.Context, in *UpdateChatRequest, opts ...grpc.CallOption) (*UpdateChatResponse, error)
 }
 
 type chatServiceClient struct {
@@ -98,6 +100,24 @@ func (c *chatServiceClient) GetChat(ctx context.Context, in *GetChatRequest, opt
 	return out, nil
 }
 
+func (c *chatServiceClient) DeleteChat(ctx context.Context, in *DeleteChatRequest, opts ...grpc.CallOption) (*DeleteChatResponse, error) {
+	out := new(DeleteChatResponse)
+	err := c.cc.Invoke(ctx, "/chat_v1.ChatService/DeleteChat", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatServiceClient) UpdateChat(ctx context.Context, in *UpdateChatRequest, opts ...grpc.CallOption) (*UpdateChatResponse, error) {
+	out := new(UpdateChatResponse)
+	err := c.cc.Invoke(ctx, "/chat_v1.ChatService/UpdateChat", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChatServiceServer is the server API for ChatService service.
 // All implementations must embed UnimplementedChatServiceServer
 // for forward compatibility
@@ -109,6 +129,8 @@ type ChatServiceServer interface {
 	RemoveUserFromChat(context.Context, *RemoveUserFromChatRequest) (*RemoveUserFromChatResponse, error)
 	GetMessages(context.Context, *GetMessagesRequest) (*GetMessagesResponse, error)
 	GetChat(context.Context, *GetChatRequest) (*GetChatResponse, error)
+	DeleteChat(context.Context, *DeleteChatRequest) (*DeleteChatResponse, error)
+	UpdateChat(context.Context, *UpdateChatRequest) (*UpdateChatResponse, error)
 	mustEmbedUnimplementedChatServiceServer()
 }
 
@@ -136,6 +158,12 @@ func (UnimplementedChatServiceServer) GetMessages(context.Context, *GetMessagesR
 }
 func (UnimplementedChatServiceServer) GetChat(context.Context, *GetChatRequest) (*GetChatResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetChat not implemented")
+}
+func (UnimplementedChatServiceServer) DeleteChat(context.Context, *DeleteChatRequest) (*DeleteChatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteChat not implemented")
+}
+func (UnimplementedChatServiceServer) UpdateChat(context.Context, *UpdateChatRequest) (*UpdateChatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateChat not implemented")
 }
 func (UnimplementedChatServiceServer) mustEmbedUnimplementedChatServiceServer() {}
 
@@ -276,6 +304,42 @@ func _ChatService_GetChat_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ChatService_DeleteChat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteChatRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServiceServer).DeleteChat(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chat_v1.ChatService/DeleteChat",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServiceServer).DeleteChat(ctx, req.(*DeleteChatRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChatService_UpdateChat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateChatRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServiceServer).UpdateChat(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chat_v1.ChatService/UpdateChat",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServiceServer).UpdateChat(ctx, req.(*UpdateChatRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ChatService_ServiceDesc is the grpc.ServiceDesc for ChatService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -310,6 +374,14 @@ var ChatService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetChat",
 			Handler:    _ChatService_GetChat_Handler,
+		},
+		{
+			MethodName: "DeleteChat",
+			Handler:    _ChatService_DeleteChat_Handler,
+		},
+		{
+			MethodName: "UpdateChat",
+			Handler:    _ChatService_UpdateChat_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
