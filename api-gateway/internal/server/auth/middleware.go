@@ -4,6 +4,7 @@ import (
 	"api-gateway/internal/errorz"
 	"api-gateway/internal/server/helper"
 	"api-gateway/internal/utils"
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -51,6 +52,7 @@ func (h *Handler) Auth(next http.Handler) http.Handler {
 
 		md := metadata.New(map[string]string{"user_id": claims.UserID})
 		ctx = metadata.NewOutgoingContext(r.Context(), md)
+		ctx = context.WithValue(ctx, "user_id", claims.UserID)
 
 		// Передача запроса следующему обработчику
 		next.ServeHTTP(w, r.WithContext(ctx))

@@ -59,10 +59,7 @@ func NewRedisConfig() (RedisConfig, error) {
 	password := os.Getenv(redisPasswordEnv)
 
 	db := os.Getenv(redisDBEnvName)
-	dbInt, err := strconv.Atoi(db)
-	if err != nil {
-		return nil, err
-	}
+	dbInt, _ := strconv.Atoi(db)
 
 	return &redisConfig{
 		host:     host,
