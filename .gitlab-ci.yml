@@ -16,13 +16,25 @@ variables:
   KAFKA_BROKER: kafka:9092
   ZOOKEEPER_HOST: zookeeper:2181
 
+image: golang:1.23
+
 build:
   stage: build
   script:
     - echo "Building services..."
-    - go build -o bin/user_service ./UserService
-    - go build -o bin/project_service ./project-service
-    - go build -o bin/notification_service ./notification-service
+    - mkdir bin
+
+    - cd UserService
+    - go build -o ../bin/user_service ./cmd/user_service/main.go
+    - cd ..
+
+    - cd notification-service
+    - go build -o ../bin/notification_service ./cmd/notification_service/main.go
+    - cd ..
+    
+    - cd project-service
+    - go build -o ../bin/project_service ./cmd/project_service/main.go
+    - cd ..
   artifacts:
     paths:
       - bin/
@@ -37,13 +49,14 @@ test_user_service:
     POSTGRES_PASSWORD: $USER_SERVICE_PG_PASS
     POSTGRES_DB: $USER_SERVICE_PG_DB
   script:
-    - echo "Waiting for services..."
-    - until pg_isready -h $USER_SERVICE_PG_HOST -p 5432 -U $USER_SERVICE_PG_USER; do sleep 1; done
-    - echo "Running tests for User Service..."
-    - go test ./user_service/... -v -cover -coverprofile=user_service.coverage
+    - echo "Waiting for PostgreSQL to be ready..."
+    - until pg_isready -h user_service_database -p 5432 -U $USER_SERVICE_PG_USER; do sleep 1; done
+    - cd UserService
+    - go test ./... -v -cover -coverprofile=user_service.coverage
+    - cd ..
   artifacts:
     paths:
-      - user_service.coverage
+      - ./UserService/user_service.coverage
 
 test_project_service:
   stage: test
@@ -59,13 +72,15 @@ test_project_service:
     POSTGRES_PASSWORD: $PROJECT_SERVICE_PG_PASS
     POSTGRES_DB: $PROJECT_SERVICE_PG_DB
   script:
-    - echo "Waiting for services..."
-    - until pg_isready -h $PROJECT_SERVICE_PG_HOST -p 5432 -U $PROJECT_SERVICE_PG_USER; do sleep 1; done
+    - echo "Waiting for PostgreSQL to be ready..."
+    - until pg_isready -h project_service_database -p 5432 -U $PROJECT_SERVICE_PG_USER; do sleep 1; done
     - echo "Running tests for Project Service..."
-    - go test ./project_service/... -v -cover -coverprofile=project_service.coverage
+    - cd project-service
+    - go test ./... -v -cover -coverprofile=project_service.coverage
+    - cd ..
   artifacts:
     paths:
-      - project_service.coverage
+      - ./project-service/project_service.coverage
 
 test_notification_service:
   stage: test
@@ -75,8 +90,10 @@ test_notification_service:
     - name: confluentinc/cp-kafka:7.5.0
       alias: kafka
   script:
-    - echo "Running tests for Project Service..."
-    - go test ./notification_service/... -v -cover -coverprofile=notification_service.coverage
+    - echo "Running tests for Notification Service..."
+    - cd notification-service
+    - go test ./... -v -cover -coverprofile=notification_service.coverage
+    - cd ..
   artifacts:
     paths:
-      - notification_service.coverage
+      - ./notification-service/notification_service.coverage
