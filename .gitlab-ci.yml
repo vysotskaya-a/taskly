@@ -23,9 +23,22 @@ build:
   # image: golang:1.23
   script:
     - echo "Building services..."
-    - go build -o bin/user_service ./UserService
-    - go build -o bin/project_service ./project-service
-    - go build -o bin/notification_service ./notification-service
+    - mkdir bin
+
+    - cd UserService
+    - go build -o ../bin/user_service ./cmd/user_service/main.go
+    - cd ..
+
+    - cd notification-service
+    - go build -o ../bin/notification_service ./cmd/notification_service/main.go
+    - cd ..
+
+    - cd project-service
+    - go build -o ../bin/project_service ./cmd/project_service/main.go
+    - cd ..
+    # - go build -o bin/user_service ./UserService/
+    # - go build -o bin/project_service ./project-service
+    # - go build -o bin/notification_service ./notification-service
   artifacts:
     paths:
       - bin/
