@@ -69,6 +69,7 @@ test_project_service:
 
 test_notification_service:
   stage: test
+  services:
     - name: confluentinc/cp-zookeeper:7.5.0
       alias: zookeeper
     - name: confluentinc/cp-kafka:7.5.0
