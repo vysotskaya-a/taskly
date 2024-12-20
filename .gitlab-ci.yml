@@ -45,7 +45,6 @@ build:
 
 test_user_service:
   stage: test
-  # image: golang:1.23
   services:
     - name: postgres:16.2-alpine3.19
       alias: user_service_database
@@ -54,17 +53,18 @@ test_user_service:
     POSTGRES_PASSWORD: $USER_SERVICE_PG_PASS
     POSTGRES_DB: $USER_SERVICE_PG_DB
   script:
+    - apk add --no-cache postgresql-client
     - echo "Waiting for services..."
     - until pg_isready -h $USER_SERVICE_PG_HOST -p 5432 -U $USER_SERVICE_PG_USER; do sleep 1; done
-    - echo "Running tests for User Service..."
-    - go test ./user_service/... -v -cover -coverprofile=user_service.coverage
+    - cd user_service
+    - go test ./... -v -cover -coverprofile=user_service.coverage
   artifacts:
     paths:
       - user_service.coverage
 
+
 test_project_service:
   stage: test
-  # image: golang:1.23
   services:
     - name: postgres:16.2-alpine3.19
       alias: project_service_database
@@ -77,10 +77,12 @@ test_project_service:
     POSTGRES_PASSWORD: $PROJECT_SERVICE_PG_PASS
     POSTGRES_DB: $PROJECT_SERVICE_PG_DB
   script:
+    - apk add --no-cache postgresql-client
     - echo "Waiting for services..."
     - until pg_isready -h $PROJECT_SERVICE_PG_HOST -p 5432 -U $PROJECT_SERVICE_PG_USER; do sleep 1; done
     - echo "Running tests for Project Service..."
-    - go test ./project_service/... -v -cover -coverprofile=project_service.coverage
+    - cd project_service
+    - go test ./... -v -cover -coverprofile=project_service.coverage
   artifacts:
     paths:
       - project_service.coverage
@@ -95,6 +97,7 @@ test_notification_service:
       alias: kafka
   script:
     - echo "Running tests for Project Service..."
+    - cd notification_service
     - go test ./notification_service/... -v -cover -coverprofile=notification_service.coverage
   artifacts:
     paths:
