@@ -33,6 +33,7 @@ func (c *Client) WriteUpdates() {
 }
 
 func (c *Client) ReadMessage(h *Hub) {
+	fmt.Println("Start read message ", c.ID)
 	defer func() {
 		h.Unregister <- c
 		c.Conn.Close()
@@ -61,6 +62,7 @@ func (c *Client) ReadMessage(h *Hub) {
 			}
 			break
 		}
+		fmt.Println("Message: ", string(m), " ID: ", c.ID)
 		var msg *entity.Message
 		err = json.Unmarshal(m, &msg)
 		if err != nil {

@@ -28,6 +28,7 @@ func (h *Handler) JoinRooms(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 	userID, ok := r.Context().Value("user_id").(string)
+	fmt.Println("Conected: ", userID)
 	if !ok {
 		return errorz.APIError{
 			Status: http.StatusBadRequest,
@@ -38,7 +39,9 @@ func (h *Handler) JoinRooms(w http.ResponseWriter, r *http.Request) error {
 	userChats, err := h.chatAPIClient.GetUserChats(r.Context(), &chatpb.GetUserChatsRequest{
 		UserId: userID,
 	})
+	fmt.Println("User Chats: ", userChats.GetProjectIds())
 	if err != nil {
+		fmt.Println(err)
 		st, _ := status.FromError(err)
 		switch st.Code() {
 		case codes.NotFound:
@@ -61,7 +64,9 @@ func (h *Handler) JoinRooms(w http.ResponseWriter, r *http.Request) error {
 		Updates: make(chan interface{}),
 		RoomIDs: userChats.GetProjectIds(),
 	}
+	fmt.Println(client)
 	h.hub.Register <- client
+	fmt.Println("Client register")
 	go client.ReadMessage(h.hub)
 	go client.WriteUpdates()
 	return nil

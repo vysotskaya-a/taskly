@@ -10,8 +10,7 @@ type Handler struct {
 	chatAPIClient chatpb.ChatServiceClient
 }
 
-func NewHandler(chatAPIClient chatpb.ChatServiceClient, chatService ws.ChatService) *Handler {
-	hub := ws.NewHub(chatService)
+func NewHandler(chatAPIClient chatpb.ChatServiceClient, chatService ws.ChatService, hub *ws.Hub) *Handler {
 	return &Handler{
 		hub:           hub,
 		chatAPIClient: chatAPIClient,

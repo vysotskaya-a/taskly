@@ -5,6 +5,7 @@ import (
 	"api-gateway/internal/config"
 	"api-gateway/internal/server/auth"
 	"api-gateway/internal/server/chat"
+	"api-gateway/internal/server/chat/ws"
 	"api-gateway/internal/server/project"
 	"api-gateway/internal/server/task"
 	"api-gateway/internal/server/user"
@@ -33,6 +34,7 @@ type serviceProvider struct {
 	redis *redis.Client
 
 	chatService *service.Chat
+	hub         *ws.Hub
 
 	userClientConn *grpc.ClientConn
 	authAPIClient  authpb.AuthV1Client
@@ -54,6 +56,13 @@ type serviceProvider struct {
 // Инициализирует сервис провайдер.
 func newServiceProvider() *serviceProvider {
 	return &serviceProvider{}
+}
+
+func (s *serviceProvider) Hub() *ws.Hub {
+	if s.hub == nil {
+		s.hub = ws.NewHub(s.ChatService())
+	}
+	return s.hub
 }
 
 // GRPCConfig геттер для grpc конфига.
@@ -257,7 +266,7 @@ func (s *serviceProvider) TaskHandler() *task.Handler {
 // ChatHandler геттер для Chat Handler'а.
 func (s *serviceProvider) ChatHandler() *chat.Handler {
 	if s.chatHandler == nil {
-		s.chatHandler = chat.NewHandler(s.ChatAPIClient(), s.ChatService())
+		s.chatHandler = chat.NewHandler(s.ChatAPIClient(), s.ChatService(), s.Hub())
 	}
 	return s.chatHandler
 }
