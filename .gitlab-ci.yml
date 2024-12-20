@@ -16,8 +16,11 @@ variables:
   KAFKA_BROKER: kafka:9092
   ZOOKEEPER_HOST: zookeeper:2181
 
+image: golang:1.23
+
 build:
   stage: build
+  # image: golang:1.23
   script:
     - echo "Building services..."
     - go build -o bin/user_service ./UserService
@@ -29,6 +32,7 @@ build:
 
 test_user_service:
   stage: test
+  # image: golang:1.23
   services:
     - name: postgres:16.2-alpine3.19
       alias: user_service_database
@@ -47,6 +51,7 @@ test_user_service:
 
 test_project_service:
   stage: test
+  # image: golang:1.23
   services:
     - name: postgres:16.2-alpine3.19
       alias: project_service_database
@@ -69,6 +74,7 @@ test_project_service:
 
 test_notification_service:
   stage: test
+  # image: golang:1.23
   services:
     - name: confluentinc/cp-zookeeper:7.5.0
       alias: zookeeper
