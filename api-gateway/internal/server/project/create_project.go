@@ -20,6 +20,15 @@ func (h *Handler) CreateProject(w http.ResponseWriter, r *http.Request) error {
 	// Получение контекста
 	ctx := r.Context()
 
+	userID, ok := r.Context().Value("user_id").(string)
+	if !ok {
+		return errorz.APIError{
+			Status: http.StatusUnauthorized,
+			Err:    fmt.Errorf("failed to get user id"),
+			Msg:    "failed to get user id",
+		}
+	}
+
 	// Декодируем тело запроса в структуру createProjectRequest
 	var createProjectRequest request.CreateProject
 	if err := json.NewDecoder(r.Body).Decode(&createProjectRequest); err != nil {
@@ -29,6 +38,7 @@ func (h *Handler) CreateProject(w http.ResponseWriter, r *http.Request) error {
 			Msg:    "error decoding request body",
 		}
 	}
+	createProjectRequest.Users = append(createProjectRequest.Users, userID)
 
 	// Получение ответа от api клиента
 	createProjectResp, err := h.projectAPIClient.CreateProject(ctx, &projectpb.CreateProjectRequest{

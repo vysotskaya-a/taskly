@@ -24,7 +24,7 @@ func (s *Server) CreateProject(ctx context.Context, req *pb.CreateProjectRequest
 	project := &models.Project{
 		Title:                        req.GetTitle(),
 		Description:                  req.GetDescription(),
-		Users:                        []string{userID},
+		Users:                        req.GetUsers(),
 		AdminID:                      userID,
 		NotificationSubscribersTGIDS: make([]int64, 0),
 	}
