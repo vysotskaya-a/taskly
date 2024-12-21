@@ -75,7 +75,7 @@ func (r *TaskRepository) GetByID(ctx context.Context, id string) (*models.Task, 
 func (r *TaskRepository) GetAllByProjectID(ctx context.Context, projectID string) ([]*models.Task, error) {
 	const op = "Postgres.ProjectRepository.GetAllByProjectID"
 
-	builder := sq.Select(tasksIDColumn, tasksTitleColumn, tasksDescriptionColumn, tasksStatusColumn, tasksProjectIDColumn, tasksExecutorIDColumn, tasksDeadlineColumn).
+	builder := sq.Select(tasksIDColumn, tasksTitleColumn, tasksDescriptionColumn, tasksStatusColumn, tasksProjectIDColumn, tasksExecutorIDColumn, tasksDeadlineColumn, tasksCreatedAtColumn, tasksUpdatedAtColumn).
 		From(tasksTableName).
 		Where(sq.Eq{tasksProjectIDColumn: projectID}).
 		PlaceholderFormat(sq.Dollar)

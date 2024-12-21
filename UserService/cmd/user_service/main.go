@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"time"
 	"user-service/internal/app"
 
 	"github.com/rs/zerolog/log"
@@ -10,6 +11,8 @@ import (
 )
 
 func main() {
+	time.Sleep(time.Duration(4) * time.Second)
+
 	ctx := context.Background()
 
 	a, err := app.NewApp(ctx)

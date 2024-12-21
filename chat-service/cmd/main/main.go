@@ -12,12 +12,15 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 )
 
 func main() {
+	time.Sleep(time.Duration(4) * time.Second)
+
 	log := logger.NewZapLogger("chat-service")
 	context := logger.ContextWithLogger(context.Background(), log)
 
